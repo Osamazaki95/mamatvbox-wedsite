@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { color-scheme: dark; scroll-behavior: smooth; }
+  body { @apply bg-bg text-ink font-sans antialiased; }
+  ::selection { background: #4FE3D055; }
+  a { @apply transition-colors; }
+  a:hover { @apply text-teal; }
+  :focus-visible { outline: 2px solid #4FE3D0; outline-offset: 2px; border-radius: 6px; }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: #2A2E36; border-radius: 99px; }
+}
+
+@layer components {
+  .card { @apply rounded-xl2 border border-line/60 bg-card; }
+  .panel { @apply rounded-xl bg-panel; }
+  .eyebrow { @apply inline-flex items-center gap-1.5 text-xs font-medium; }
+  .text-gradient-brand {
+    background: linear-gradient(90deg, #4FE3D0 0%, #A7F3D0 45%, #FBBF24 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .glow-teal { background: radial-gradient(60% 60% at 50% 0%, #4FE3D022 0%, transparent 70%); }
+  .glow-gold { background: radial-gradient(50% 50% at 20% 100%, #FBBF2418 0%, transparent 70%); }
+  .skeleton { @apply relative overflow-hidden bg-panel; }
+  .skeleton::after {
+    content: ''; position: absolute; inset: 0; transform: translateX(100%);
+    background: linear-gradient(90deg, transparent, #ffffff0d, transparent);
+    @apply animate-shimmer;
+  }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { scrollbar-width: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
