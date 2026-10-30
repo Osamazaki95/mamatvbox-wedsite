@@ -1,14 +1,15 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Baby, Check, Clapperboard, ExternalLink, ImagePlus, Link2, Loader2, Mic, Pencil, Plus, Search, Trash2, Tv, UploadCloud, X } from 'lucide-react';
+import { Baby, Check, Clapperboard, Eye, ExternalLink, Globe2, ImagePlus, Link2, Loader2, Mic, Moon, Pencil, Plus, Search, Tags, Trash2, Tv, UploadCloud, X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Counter, Stagger, StaggerItem } from '@/components/motion';
 import { Button } from '@/components/ui/Button';
 import { Badge, Field, Toggle, inputClass } from '@/components/ui/primitives';
 import { adminFetch } from '@/lib/admin';
-import type { Platform, Title, TitleType } from '@/lib/api/types';
-import { cn } from '@/lib/utils';
+import type { Platform, SiteSettings, Taxonomy, Title, TitleType } from '@/lib/api/types';
+import { defaultTaxonomy, hasGenre } from '@/lib/site-defaults';
+import { cn, toArabicDigits } from '@/lib/utils';
 
 const types: { k: TitleType; l: string; icon: typeof Tv }[] = [
   { k: 'movie', l: 'فيلم', icon: Clapperboard },
@@ -21,20 +22,20 @@ const qualities = ['4K UHD', '4K HDR', 'IMAX 4K', '1080p FHD', 'HD 720p'];
 
 interface Form {
   id?: string; type: TitleType; title: string; originalTitle: string; slug: string; year: number;
-  genres: string; rating: number; runtime: string; quality: string; overview: string; director: string;
+  genres: string[]; origin: string; ramadan: boolean; rating: number; runtime: string; quality: string; overview: string; director: string;
   cast: string; poster: string; platforms: string[]; links: Record<string, string>;
   download: boolean; inPlan: boolean; expiresInDays: number | '';
 }
 
 const emptyForm = (): Form => ({
-  type: 'movie', title: '', originalTitle: '', slug: '', year: new Date().getFullYear(), genres: '', rating: 0,
+  type: 'movie', title: '', originalTitle: '', slug: '', year: new Date().getFullYear(), genres: [], origin: '', ramadan: false, rating: 0,
   runtime: '', quality: '1080p FHD', overview: '', director: '', cast: '', poster: '', platforms: [], links: {},
   download: false, inPlan: false, expiresInDays: '',
 });
 
 const toForm = (t: Title): Form => ({
   id: t.id, type: t.type, title: t.title, originalTitle: t.originalTitle ?? '', slug: t.slug, year: t.year,
-  genres: t.genres.join('، '), rating: t.rating, runtime: t.runtime, quality: t.quality, overview: t.overview,
+  genres: t.genres, origin: t.origin ?? '', ramadan: !!t.ramadan, rating: t.rating, runtime: t.runtime, quality: t.quality, overview: t.overview,
   director: t.director, cast: t.cast.join('، '), poster: t.poster ?? '', platforms: t.platforms, links: t.links ?? {},
   download: t.download, inPlan: t.inPlan, expiresInDays: t.expiresInDays ?? '',
 });
@@ -60,8 +61,12 @@ async function uploadPoster(file: File): Promise<string> {
 export default function AdminTitlesPage() {
   const [titles, setTitles] = useState<Title[] | null>(null);
   const [platforms, setPlatforms] = useState<Platform[]>([]);
+  const [taxonomy, setTaxonomy] = useState<Taxonomy>(defaultTaxonomy);
   const [q, setQ] = useState('');
   const [type, setType] = useState<TitleType | 'all'>('all');
+  const [originF, setOriginF] = useState('');
+  const [ramadanF, setRamadanF] = useState(false);
+  const [bulkOrigin, setBulkOrigin] = useState('');
   const [editing, setEditing] = useState<Form | null>(null);
   const [confirmDel, setConfirmDel] = useState<Title | null>(null);
   const [toast, setToast] = useState('');
@@ -71,15 +76,21 @@ export default function AdminTitlesPage() {
   const [confirmBulk, setConfirmBulk] = useState<'delete' | 'delete-all' | null>(null);
 
   const toggleSel = (id: string) => setSelected((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
-  const bulk = async (action: 'delete' | 'type' | 'delete-all', ids: string[] = [...selected], type?: TitleType) => {
+  const bulk = async (action: 'delete' | 'type' | 'delete-all' | 'ramadan-on' | 'ramadan-off' | 'origin', ids: string[] = [...selected], type?: TitleType, origin?: string) => {
     setBulkBusy(true);
     try {
-      const r = await adminFetch<{ affected: number }>('titles/bulk', { method: 'POST', body: { action, ids, type } });
-      flash(action === 'type' ? `تم نقل ${r.affected} عمل إلى «${typeLabel[type as TitleType]}»` : `تم حذف ${r.affected} عمل`);
+      const r = await adminFetch<{ affected: number }>('titles/bulk', { method: 'POST', body: { action, ids, type, origin } });
+      flash(action === 'type' ? `تم نقل ${r.affected} عمل إلى «${typeLabel[type as TitleType]}»`
+        : action === 'ramadan-on' ? `تمت إضافة ${r.affected} عمل لقسم رمضان`
+          : action === 'ramadan-off' ? `تمت إزالة ${r.affected} عمل من قسم رمضان`
+            : action === 'origin' ? `تم تصنيف ${r.affected} عمل «${origin || 'بدون بلد'}»`
+              : `تم حذف ${r.affected} عمل`);
       if (action === 'type') setTitles((l) => (l ?? []).map((t) => (ids.includes(t.id) ? { ...t, type: type as TitleType } : t)));
+      else if (action === 'ramadan-on' || action === 'ramadan-off') setTitles((l) => (l ?? []).map((t) => (ids.includes(t.id) ? { ...t, ramadan: action === 'ramadan-on' } : t)));
+      else if (action === 'origin') setTitles((l) => (l ?? []).map((t) => (ids.includes(t.id) ? { ...t, origin: origin || null } : t)));
       else if (action === 'delete-all') setTitles([]);
       else setTitles((l) => (l ?? []).filter((t) => !ids.includes(t.id)));
-      if (action !== 'type') setSelected(new Set());
+      if (action === 'delete' || action === 'delete-all') setSelected(new Set());
     } catch {
       flash('تعذر تنفيذ العملية');
     } finally {
@@ -89,8 +100,8 @@ export default function AdminTitlesPage() {
   };
 
   const flash = (m: string) => { setToast(m); setTimeout(() => setToast(''), 2600); };
-  const load = () => Promise.all([adminFetch<Title[]>('titles'), adminFetch<Platform[]>('platforms')])
-    .then(([t, p]) => { setTitles(t); setPlatforms(p); })
+  const load = () => Promise.all([adminFetch<Title[]>('titles'), adminFetch<Platform[]>('platforms'), adminFetch<SiteSettings>('settings')])
+    .then(([t, p, s]) => { setTitles(t); setPlatforms(p); if (s.taxonomy) setTaxonomy(s.taxonomy); })
     .catch(() => flash('تعذر تحميل البيانات'));
 
   useEffect(() => {
@@ -102,7 +113,11 @@ export default function AdminTitlesPage() {
   const list = titles ?? [];
   const view = useMemo(() => list.filter((t) =>
     (type === 'all' || t.type === type) &&
-    (!q || `${t.title} ${t.originalTitle ?? ''}`.toLowerCase().includes(q.toLowerCase()))), [list, q, type]);
+    (!originF || (originF === '-' ? !t.origin : t.origin === originF)) &&
+    (!ramadanF || t.ramadan) &&
+    (!q || `${t.title} ${t.originalTitle ?? ''}`.toLowerCase().includes(q.toLowerCase()))), [list, q, type, originF, ramadanF]);
+  const allOrigins = useMemo(() => [...new Set([...Object.values(taxonomy).flatMap((g) => g.origins), ...list.map((t) => t.origin).filter((o): o is string => !!o)])], [taxonomy, list]);
+  const originChoices = type === 'all' ? allOrigins : taxonomy[type].origins;
   const count = (k: TitleType) => list.filter((t) => t.type === k).length;
 
   const remove = async (t: Title) => {
@@ -138,6 +153,14 @@ export default function AdminTitlesPage() {
             </button>
           ))}
         </div>
+        <div className="flex shrink-0 gap-2">
+          <select value={originF} onChange={(e) => setOriginF(e.target.value)} className="h-10 rounded-full bg-panel px-4 text-xs outline-none" aria-label="البلد">
+            <option value="">كل البلاد</option>
+            {originChoices.map((o) => <option key={o} value={o}>{o}</option>)}
+            <option value="-">بدون تصنيف بلد</option>
+          </select>
+          <button onClick={() => setRamadanF((v) => !v)} className={cn('flex h-10 items-center gap-1.5 rounded-full px-4 text-xs font-semibold', ramadanF ? 'bg-gold text-bg' : 'bg-panel text-muted')}><Moon className="h-3.5 w-3.5" /> رمضان</button>
+        </div>
       </div>
 
       {titles !== null && list.length > 0 && (
@@ -155,6 +178,14 @@ export default function AdminTitlesPage() {
                   {types.map((t) => <option key={t.k} value={t.k}>{t.l}</option>)}
                 </select>
                 <Button size="sm" variant="teal" pill={false} loading={bulkBusy} onClick={() => bulk('type', [...selected], bulkType)}>نقل</Button>
+                <span className="mx-1 h-6 w-px bg-line" />
+                <select value={bulkOrigin} onChange={(e) => setBulkOrigin(e.target.value)} className="h-9 rounded-lg bg-panel px-3 text-sm outline-none" aria-label="البلد">
+                  <option value="">البلد: بدون</option>
+                  {allOrigins.map((o) => <option key={o} value={o}>البلد: {o}</option>)}
+                </select>
+                <Button size="sm" variant="ghost" pill={false} loading={bulkBusy} onClick={() => bulk('origin', [...selected], undefined, bulkOrigin)} icon={<Globe2 className="h-3.5 w-3.5" />}>تطبيق</Button>
+                <Button size="sm" variant="ghost" pill={false} onClick={() => bulk('ramadan-on')} icon={<Moon className="h-3.5 w-3.5 text-gold" />}>إضافة لرمضان</Button>
+                <Button size="sm" variant="ghost" pill={false} onClick={() => bulk('ramadan-off')}>إزالة من رمضان</Button>
                 <Button size="sm" variant="danger" pill={false} onClick={() => setConfirmBulk('delete')} icon={<Trash2 className="h-3.5 w-3.5" />}>حذف المحدد</Button>
                 <button onClick={() => setSelected(new Set())} className="text-xs text-muted underline">إلغاء التحديد</button>
               </motion.div>
@@ -188,10 +219,15 @@ export default function AdminTitlesPage() {
                   </label>
                   <Badge tone="solidGold" className="absolute bottom-2 right-2">{typeLabel[t.type]}</Badge>
                   {t.source === 'tmdb' && <Badge className="absolute left-2 top-2 bg-bg/80">مزامنة</Badge>}
+                  {t.ramadan && <span className="absolute bottom-2 left-2 grid h-7 w-7 place-items-center rounded-full bg-gold text-bg" title="رمضان"><Moon className="h-3.5 w-3.5" /></span>}
                 </div>
                 <div className="flex flex-1 flex-col p-3">
                   <b className="truncate text-sm">{t.title}</b>
                   <p className="mt-0.5 truncate text-xs text-muted">{t.year} • {t.platforms.map(pName).join('، ') || 'بدون منصات'}</p>
+                  <p className="mt-1 flex items-center justify-between gap-2 text-[11px]">
+                    <span className={cn('truncate', t.origin ? 'text-teal' : 'text-dim')}>{t.origin || 'بدون بلد'}</span>
+                    <span className="flex shrink-0 items-center gap-1 text-muted" title="عدد المشاهدات"><Eye className="h-3 w-3" /> {toArabicDigits(t.views ?? 0)}</span>
+                  </p>
                   <select value={t.type} onChange={(e) => bulk('type', [t.id], e.target.value as TitleType)} className="mt-2 h-8 rounded-lg bg-surface px-2 text-xs outline-none" aria-label="القسم">
                     {types.map((x) => <option key={x.k} value={x.k}>القسم: {x.l}</option>)}
                   </select>
@@ -213,6 +249,7 @@ export default function AdminTitlesPage() {
             key="form"
             initial={editing}
             platforms={platforms}
+            taxonomy={taxonomy}
             onClose={() => setEditing(null)}
             onSaved={(msg) => { setEditing(null); flash(msg); load(); }}
             onError={flash}
@@ -252,9 +289,10 @@ export default function AdminTitlesPage() {
   );
 }
 
-function TitleForm({ initial, platforms, onClose, onSaved, onError }: {
-  initial: Form; platforms: Platform[]; onClose: () => void; onSaved: (msg: string) => void; onError: (m: string) => void;
+function TitleForm({ initial, platforms, taxonomy, onClose, onSaved, onError }: {
+  initial: Form; platforms: Platform[]; taxonomy: Taxonomy; onClose: () => void; onSaved: (msg: string) => void; onError: (m: string) => void;
 }) {
+  const [genreInput, setGenreInput] = useState('');
   const [f, setF] = useState<Form>(initial);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -313,6 +351,38 @@ function TitleForm({ initial, platforms, onClose, onSaved, onError }: {
             </div>
           </section>
 
+          <section className="grid gap-5 rounded-xl bg-surface p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+            <div>
+              <p className="mb-3 flex items-center gap-2 text-sm font-bold"><Globe2 className="h-4 w-4 text-teal" /> البلد / الأصل</p>
+              <div className="flex flex-wrap gap-2">
+                {[...new Set([...taxonomy[f.type].origins, ...(f.origin && !taxonomy[f.type].origins.includes(f.origin) ? [f.origin] : [])])].map((o) => (
+                  <button type="button" key={o} onClick={() => set('origin', f.origin === o ? '' : o)} className={cn('rounded-full px-3.5 py-1.5 text-xs font-semibold transition', f.origin === o ? 'bg-teal text-bg' : 'bg-panel text-muted hover:text-ink')}>{o}</button>
+                ))}
+              </div>
+              <p className="mt-2 text-[11px] text-dim">القوائم دي بتتعدل من صفحة «التصنيفات».</p>
+              <label className="mt-4 flex items-center justify-between gap-3 rounded-xl bg-panel p-3 text-sm">
+                <span className="flex items-center gap-2"><Moon className="h-4 w-4 text-gold" /> يظهر في قسم رمضان</span>
+                <Toggle checked={f.ramadan} onChange={(v) => set('ramadan', v)} tone="gold" />
+              </label>
+            </div>
+            <div>
+              <p className="mb-3 flex items-center gap-2 text-sm font-bold"><Tags className="h-4 w-4 text-gold" /> النوع <span className="text-xs font-normal text-muted">(اختار واحد أو أكتر)</span></p>
+              <div className="flex flex-wrap gap-2">
+                {[...new Set([...taxonomy[f.type].genres, ...f.genres.filter((g) => !taxonomy[f.type].genres.some((x) => hasGenre([g], x)))])].map((g) => {
+                  const on = f.genres.some((x) => hasGenre([x], g));
+                  return (
+                    <button type="button" key={g} onClick={() => set('genres', on ? f.genres.filter((x) => !hasGenre([x], g)) : [...f.genres, g])} className={cn('flex items-center gap-1 rounded-full px-3.5 py-1.5 text-xs font-semibold transition', on ? 'bg-gold text-bg' : 'bg-panel text-muted hover:text-ink')}>
+                      {on && <Check className="h-3 w-3" />}{g}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="mt-3 flex gap-2">
+                <input value={genreInput} onChange={(e) => setGenreInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); const g = genreInput.trim(); if (g && !f.genres.includes(g)) set('genres', [...f.genres, g]); setGenreInput(''); } }} placeholder="نوع تاني مش في القائمة؟ اكتبه واضغط Enter" className="h-10 min-w-0 flex-1 rounded-lg bg-panel px-3 text-xs outline-none" />
+              </div>
+            </div>
+          </section>
+
           <section className="grid gap-6 md:grid-cols-[220px_1fr]">
             <div>
               <p className="mb-3 text-sm font-bold">البوستر</p>
@@ -342,7 +412,6 @@ function TitleForm({ initial, platforms, onClose, onSaved, onError }: {
               <Field label="التقييم من ١٠"><input type="number" min={0} max={10} step={0.1} value={f.rating} onChange={(e) => set('rating', Number(e.target.value))} className={inputClass} /></Field>
               <Field label="المدة / عدد الحلقات"><input value={f.runtime} onChange={(e) => set('runtime', e.target.value)} className={inputClass} placeholder="ساعتان أو 30 حلقة" /></Field>
               <Field label="أعلى جودة متاحة"><select value={f.quality} onChange={(e) => set('quality', e.target.value)} className={inputClass}>{qualities.map((x) => <option key={x}>{x}</option>)}</select></Field>
-              <Field label="التصنيفات (افصل بفاصلة)"><input value={f.genres} onChange={(e) => set('genres', e.target.value)} className={inputClass} placeholder="أكشن، كوميديا" /></Field>
               <Field label="الإخراج"><input value={f.director} onChange={(e) => set('director', e.target.value)} className={inputClass} /></Field>
               <Field label="البطولة (افصل بفاصلة)"><input value={f.cast} onChange={(e) => set('cast', e.target.value)} className={inputClass} /></Field>
               <div className="sm:col-span-2"><Field label="القصة / الوصف"><textarea rows={4} value={f.overview} onChange={(e) => set('overview', e.target.value)} className={`${inputClass} h-auto py-3`} /></Field></div>

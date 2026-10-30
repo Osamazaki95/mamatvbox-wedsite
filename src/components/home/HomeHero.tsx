@@ -5,6 +5,7 @@ import { ArrowLeft, Search, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { CountUp } from '@/components/motion';
+import { toArabicDigits } from '@/lib/utils';
 
 const chips = ['أفلام عربي', 'مسلسلات', 'كرتون', '4K', 'كوميدي'];
 
@@ -35,7 +36,7 @@ export function HomeHero({ stats }: { stats?: { titles: number; platforms: numbe
         </motion.h1>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mx-auto mt-5 max-w-2xl text-muted">
-          قارن التوفر وجودة العرض والتنزيل عبر ٩ منصات رقمية معتمدة في مكان واحد ويدون تشتت.
+          قارن التوفر وجودة العرض والتنزيل عبر {stats?.platforms ? `${toArabicDigits(stats.platforms)} منصة رقمية معتمدة` : 'المنصات الرقمية المعتمدة'} في مكان واحد وبدون تشتت.
         </motion.p>
 
         <motion.form

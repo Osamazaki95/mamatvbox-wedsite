@@ -1,15 +1,18 @@
 'use client';
 
-import { BellRing, Clock, Download, Eye, MapPin, SearchX, Star } from 'lucide-react';
+import { BellRing, Clock, Download, ExternalLink, Eye, Globe2, MapPin, Moon, SearchX, Star } from 'lucide-react';
+import { useEffect } from 'react';
 import { PageSkeleton, useLoad, useUrlSlug } from '@/components/Loader';
 import { Bar, Reveal, Stagger, StaggerItem } from '@/components/motion';
-import { platformName } from '@/components/title/PlatformChip';
+import { PlatformLogo } from '@/components/title/PlatformLogo';
 import { Poster } from '@/components/title/Poster';
-import { TitleActions } from '@/components/title/TitleActions';
+import { TitleActions, watchUrl } from '@/components/title/TitleActions';
 import { TitleRow } from '@/components/title/TitleRow';
 import { Button } from '@/components/ui/Button';
 import { Badge, SectionHeader } from '@/components/ui/primitives';
-import { platformsApi, titlesApi } from '@/lib/api';
+import { titlesApi } from '@/lib/api';
+import { sectionOf } from '@/lib/site-defaults';
+import { loadPlatforms, useSiteConfig } from '@/lib/site';
 import { personHref } from '@/lib/person';
 
 export default function TitleClient() {
@@ -18,9 +21,12 @@ export default function TitleClient() {
     if (!slug) return null;
     const title = await titlesApi.bySlug(slug);
     if (!title) return { title: null, similar: [], platforms: [] };
-    const [similar, platforms] = await Promise.all([titlesApi.similar(title.slug), platformsApi.list()]);
+    const [similar, platforms] = await Promise.all([titlesApi.similar(title.slug), loadPlatforms()]);
     return { title, similar, platforms };
   }, [slug]);
+  const config = useSiteConfig();
+  const loadedSlug = d?.title?.slug;
+  useEffect(() => { if (loadedSlug) titlesApi.view(loadedSlug); }, [loadedSlug]);
 
   if (!d) return <PageSkeleton />;
   if (!d.title) {
@@ -46,6 +52,8 @@ export default function TitleClient() {
           <Reveal className="order-2 lg:order-1">
             <div className="flex flex-wrap gap-2">
               <Badge tone="teal" dot>{title.inPlan ? 'في باقتك المشتركة' : 'متاح على المنصات الرسمية'}</Badge>
+              {title.ramadan && <Badge tone="gold"><Moon className="h-3 w-3" /> رمضان</Badge>}
+              {title.origin && <a href={`${sectionOf(title.type).href}/?origin=${encodeURIComponent(title.origin)}`}><Badge tone="violet"><Globe2 className="h-3 w-3" /> {sectionOf(title.type).label} {title.origin}</Badge></a>}
               {title.source === 'tmdb' && <Badge>محدّث تلقائياً</Badge>}
             </div>
             <h1 translate="no" className="notranslate mt-4 font-display text-5xl font-extrabold">{title.title}</h1>
@@ -53,7 +61,8 @@ export default function TitleClient() {
             <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-muted">
               <Badge tone="solidGold">{title.quality}</Badge>
               {title.download && <Badge tone="teal"><Download className="h-3 w-3" /> تنزيل متاح</Badge>}
-              <span>• {title.year} • {title.runtime}{title.genres.length > 0 && ` • ${title.genres.join('، ')}`}</span>
+              <span>• {title.year} • {title.runtime}</span>
+              {title.genres.map((g) => <a key={g} href={`${sectionOf(title.type).href}/?genre=${encodeURIComponent(g)}`} className="rounded-full bg-panel px-2.5 py-0.5 text-xs hover:bg-line hover:text-ink">{g}</a>)}
             </div>
             {title.overview && <p className="mt-6 max-w-3xl leading-8 text-ink/85">{title.overview}</p>}
             {title.director && (
@@ -94,17 +103,14 @@ export default function TitleClient() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-[1400px] px-5 py-8">
+      <section id="where-to-watch" className="mx-auto max-w-[1400px] scroll-mt-24 px-5 py-8">
         <SectionHeader eyebrow="التوزيع القانوني الموثق" title="أين تشاهد العمل الآن؟" subtitle="ترتيب ذكي حسب الجودة والتوفر في منطقتك." />
         <Stagger className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {offers.map((p, i) => (
             <StaggerItem key={p.id} className="card p-6 transition hover:border-teal/40">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  {p.logo
-                    // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={p.logo} alt="" className="h-11 w-11 shrink-0 rounded-xl object-cover" />
-                    : <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl font-bold" style={{ background: `${p.color}22`, color: p.color }}>{p.name[0]}</span>}
+                  <PlatformLogo platform={p} />
                   <div className="min-w-0"><b className="block truncate">{p.nameAr || p.name}</b><p className="text-xs text-muted">{p.kind === 'free' ? 'مجاني قانوني' : p.kind === 'ads' ? 'مجاني بإعلانات' : p.kind === 'rental' ? 'تأجير / شراء' : 'متاح بالاشتراك'}</p></div>
                 </div>
                 <Badge tone={i === 0 ? 'solidGold' : 'muted'}>{p.maxQuality}</Badge>
@@ -115,9 +121,9 @@ export default function TitleClient() {
                 <div className="flex justify-between"><span>السعر الشهري</span><b className="text-gold">{p.priceMonthly ? `${p.priceMonthly} ${p.currency}` : 'مجاني / حسب العمل'}</b></div>
               </div>
               <Bar value={Math.max(30, 92 - i * 18)} className="mt-4" color={i === 0 ? 'bg-gold' : 'bg-teal'} />
-              {(title.links?.[p.id] || p.url)
-                ? <a href={title.links?.[p.id] || p.url} target="_blank" rel="noopener noreferrer sponsored" className={`mt-5 flex min-h-11 w-full items-center justify-center rounded-full text-sm font-semibold ${i === 0 ? 'bg-gold text-bg hover:text-bg' : 'bg-panel'}`}>شاهد على {platformName(p.id)}</a>
-                : <Button className="mt-5 w-full" variant={i === 0 ? 'gold' : 'ghost'}>شاهد على {platformName(p.id)}</Button>}
+              <a href={watchUrl(title, p.id, p)} target="_blank" rel="noopener noreferrer sponsored" className={`mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-full text-sm font-semibold transition hover:-translate-y-0.5 ${i === 0 ? 'bg-gold text-bg shadow-gold hover:text-bg' : 'bg-panel hover:bg-line hover:text-ink'}`}>
+                شاهد على {p.nameAr || p.name} <ExternalLink className="h-3.5 w-3.5 opacity-70" />
+              </a>
             </StaggerItem>
           ))}
         </Stagger>
@@ -130,7 +136,7 @@ export default function TitleClient() {
                 <h3 className="mt-3 font-display text-xl font-bold">هذا العمل غير متاح حالياً للبث في نطاقك الجغرافي</h3>
                 <p className="mt-2 text-sm text-muted">حقوق البث الرقمي غير مفعّلة على المنصات داخل منطقتك حالياً.</p>
               </div>
-              <Button icon={<BellRing className="h-4 w-4" />}>نبهني فور توفر العمل</Button>
+              {config?.features.accounts && <Button href="/notifications/" icon={<BellRing className="h-4 w-4" />}>نبهني فور توفر العمل</Button>}
             </div>
           </Reveal>
         )}

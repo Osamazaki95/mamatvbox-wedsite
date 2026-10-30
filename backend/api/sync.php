@@ -134,7 +134,7 @@ function run_sync(): array {
                 $isKids = in_array(16, $gids, true) || in_array(10762, $gids, true);
                 $isProgram = (bool) array_intersect($gids, [99, 10763, 10764, 10767]);
                 $detected = $isKids ? 'kids' : ($ty === 'tv' ? ($isProgram ? 'program' : 'series') : ($isProgram ? 'program' : 'movie'));
-                unset($lang);
+                $origin = $prev['origin'] ?? detect_origin($prev['type'] ?? $detected, $lang, (array) ($it['origin_country'] ?? []));
                 $titles[$id] = array_replace($prev ?? [], [
                     'id' => $id, 'tmdbId' => $it['id'], 'source' => 'tmdb', 'slug' => "{$ty}-{$it['id']}",
                     'title' => $it['title'] ?? $it['name'] ?? '',
@@ -142,6 +142,9 @@ function run_sync(): array {
                     'type' => $detected,
                     'year' => ((int) substr($date, 0, 4)) ?: (int) date('Y'),
                     'genres' => array_values(array_filter(array_map(fn($g) => $genres[$g] ?? null, $gids))),
+                    'origin' => $origin,
+                    'popularity' => round((float) ($it['popularity'] ?? 0), 1),
+                    'ramadan' => $prev['ramadan'] ?? false,
                     'rating' => round((float) ($it['vote_average'] ?? 0), 1),
                     'runtime' => $prev['runtime'] ?? ($ty === 'tv' ? 'مسلسل' : 'فيلم'),
                     'quality' => $prev['quality'] ?? '1080p FHD',

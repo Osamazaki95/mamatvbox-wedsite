@@ -1,16 +1,33 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { ExternalLink, Pencil, Plus, Search, Sparkles, Trash2, X } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { ExternalLink, Loader2, Pencil, Plus, Search, Sparkles, Star, Trash2, UploadCloud, X } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Counter, Stagger, StaggerItem } from '@/components/motion';
+import { PlatformLogo } from '@/components/title/PlatformLogo';
 import { Button } from '@/components/ui/Button';
 import { Badge, Field, Toggle, inputClass } from '@/components/ui/primitives';
 import { adminFetch, kindLabels } from '@/lib/admin';
 import type { Platform, PlatformKind } from '@/lib/api/types';
 import { cn } from '@/lib/utils';
 
-type Filter = PlatformKind | 'all' | 'auto' | 'inactive';
+type Filter = PlatformKind | 'all' | 'auto' | 'inactive' | 'featured';
+
+const uploadErrors: Record<string, string> = {
+  too_large: 'حجم الصورة أكبر من ٥ ميجا',
+  invalid_type: 'الصورة لازم تكون PNG أو JPG أو WEBP أو SVG',
+  cannot_create_dir: 'تعذر إنشاء مجلد الصور على السيرفر',
+};
+
+async function uploadLogo(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await fetch('/api/admin/upload?folder=logos', { method: 'POST', body: fd });
+  if (res.status === 401) { window.location.href = '/admin-login/'; throw new Error('unauthorized'); }
+  const d = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
+  if (!res.ok || !d.url) throw new Error(d.error ?? 'upload_failed');
+  return d.url;
+}
 
 const blank: Platform = {
   id: '', name: '', nameAr: '', tagline: '', color: '#4FE3D0', priceMonthly: 0, currency: 'ج.م',
@@ -35,6 +52,7 @@ export default function AdminPlatformsPage() {
     if (q && !`${p.name} ${p.nameAr} ${p.id}`.toLowerCase().includes(q.toLowerCase())) return false;
     if (filter === 'auto') return !!p.auto;
     if (filter === 'inactive') return p.active === false;
+    if (filter === 'featured') return !!p.featured;
     if (filter !== 'all') return (p.kind ?? 'subscription') === filter;
     return true;
   }), [list, q, filter]);
@@ -58,6 +76,13 @@ export default function AdminPlatformsPage() {
     }
   };
 
+  const toggleFeatured = async (p: Platform) => {
+    const featured = !p.featured;
+    setList((l) => l.map((x) => (x.id === p.id ? { ...x, featured } : x)));
+    flash(featured ? 'هتظهر في أول قسم المنصات بالرئيسية' : 'اتشالت من المميزة');
+    await adminFetch(`platforms/${p.id}`, { method: 'PUT', body: { featured } }).catch(() => flash('تعذر التحديث'));
+  };
+
   const toggle = async (p: Platform) => {
     const active = p.active === false;
     setList((l) => l.map((x) => (x.id === p.id ? { ...x, active } : x)));
@@ -73,6 +98,7 @@ export default function AdminPlatformsPage() {
 
   const filters: { k: Filter; l: string }[] = [
     { k: 'all', l: 'الكل' },
+    { k: 'featured', l: 'مميزة في الرئيسية' },
     ...(Object.keys(kindLabels) as PlatformKind[]).map((k) => ({ k, l: kindLabels[k] })),
     { k: 'auto', l: 'مكتشفة تلقائياً' },
     { k: 'inactive', l: 'غير مفعّلة' },
@@ -120,17 +146,16 @@ export default function AdminPlatformsPage() {
               <motion.div layout key={p.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className={cn('flex flex-col bg-card p-5', p.active === false && 'opacity-70')}>
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex min-w-0 items-center gap-3">
-                    {p.logo
-                      // eslint-disable-next-line @next/next/no-img-element
-                      ? <img src={p.logo} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
-                      : <span className="grid h-12 w-12 shrink-0 place-items-center rounded-xl text-lg font-bold" style={{ background: `${p.color}22`, color: p.color }}>{p.name[0]}</span>}
+                    <PlatformLogo platform={p} size="lg" />
                     <div className="min-w-0"><b className="block truncate font-display text-lg">{p.nameAr || p.name}</b><p className="truncate font-mono text-xs text-muted">{p.id}</p></div>
                   </div>
                   <Toggle checked={p.active !== false} onChange={() => toggle(p)} label="تفعيل" />
                 </div>
                 <div className="mt-4 flex flex-wrap gap-1.5">
                   <Badge tone={p.kind === 'free' || p.kind === 'ads' ? 'teal' : p.kind === 'rental' ? 'violet' : 'gold'}>{kindLabels[p.kind ?? 'subscription']}</Badge>
+                  {p.featured && <Badge tone="solidGold"><Star className="h-3 w-3" /> مميزة في الرئيسية</Badge>}
                   {p.auto && <Badge tone="gold"><Sparkles className="h-3 w-3" /> مكتشفة تلقائياً</Badge>}
+                  {!p.logo && <Badge tone="danger">بدون لوجو</Badge>}
                   {p.active === false && <Badge>مخفية</Badge>}
                 </div>
                 <dl className="mt-4 grid grid-cols-2 gap-2 text-xs">
@@ -140,6 +165,7 @@ export default function AdminPlatformsPage() {
                 </dl>
                 <div className="mt-4 flex gap-2 pt-1">
                   <Button size="sm" variant="ghost" pill={false} className="flex-1" onClick={() => setEditing({ p, isNew: false })} icon={<Pencil className="h-3.5 w-3.5" />}>تعديل</Button>
+                  <button onClick={() => toggleFeatured(p)} className={cn('grid h-8 w-9 place-items-center rounded-lg', p.featured ? 'bg-gold text-bg' : 'bg-panel text-muted')} aria-label="مميزة في الرئيسية" title="تظهر أولاً في الرئيسية"><Star className={cn('h-3.5 w-3.5', p.featured && 'fill-bg')} /></button>
                   {p.url && <a href={p.url} target="_blank" rel="noreferrer" className="grid h-8 w-9 place-items-center rounded-lg bg-panel" aria-label="فتح الموقع"><ExternalLink className="h-3.5 w-3.5" /></a>}
                   <button onClick={() => setConfirmDel(p)} className="grid h-8 w-9 place-items-center rounded-lg bg-danger-soft text-danger" aria-label="حذف"><Trash2 className="h-3.5 w-3.5" /></button>
                 </div>
@@ -174,7 +200,19 @@ function PlatformForm({ initial, isNew, onClose, onSave }: { initial: Platform; 
   const [ids, setIds] = useState((initial.tmdbProviderIds ?? []).join(', '));
   const [regions, setRegions] = useState((initial.regions ?? ['EG']).join(', '));
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [logoErr, setLogoErr] = useState('');
+  const [drag, setDrag] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const set = <K extends keyof Platform>(k: K, v: Platform[K]) => setF((s) => ({ ...s, [k]: v }));
+  const onLogo = async (file?: File) => {
+    if (!file) return;
+    setUploading(true);
+    setLogoErr('');
+    try { set('logo', await uploadLogo(file)); }
+    catch (e) { setLogoErr(uploadErrors[(e as Error).message] ?? 'تعذر رفع الصورة'); }
+    finally { setUploading(false); }
+  };
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -212,8 +250,34 @@ function PlatformForm({ initial, isNew, onClose, onSave }: { initial: Platform; 
             </select>
           </Field>
           <div className="sm:col-span-2">{text('tagline', 'وصف قصير يظهر تحت الاسم', { placeholder: 'الأرشيف المصري والدراما الحية' })}</div>
+          <div className="sm:col-span-2">
+            <p className="mb-2 text-xs font-medium text-muted">لوجو المنصة (بيظهر في كل الموقع بدل الحرف)</p>
+            <div className="flex flex-wrap items-center gap-4 rounded-xl bg-panel p-4">
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+                onDragLeave={() => setDrag(false)}
+                onDrop={(e) => { e.preventDefault(); setDrag(false); onLogo(e.dataTransfer.files[0]); }}
+                className={cn('relative grid h-24 w-24 shrink-0 place-items-center overflow-hidden rounded-2xl border-2 border-dashed transition', drag ? 'border-teal bg-teal-soft' : 'border-line bg-bg hover:border-teal/60')}
+                aria-label="رفع لوجو"
+              >
+                {f.logo ? <PlatformLogo platform={f} size="lg" className="h-20 w-20" /> : <UploadCloud className="h-8 w-8 text-teal" />}
+                {uploading && <span className="absolute inset-0 grid place-items-center bg-bg/70"><Loader2 className="h-6 w-6 animate-spin text-teal" /></span>}
+              </button>
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" size="sm" variant="teal" pill={false} onClick={() => fileRef.current?.click()} icon={<UploadCloud className="h-3.5 w-3.5" />}>{f.logo ? 'تغيير اللوجو' : 'رفع لوجو من جهازك'}</Button>
+                  {f.logo && <Button type="button" size="sm" variant="danger" pill={false} onClick={() => set('logo', '')}>إزالة</Button>}
+                </div>
+                <input dir="ltr" value={f.logo ?? ''} onChange={(e) => set('logo', e.target.value)} placeholder="أو الصق رابط الصورة https://.../logo.png" className={`${inputClass} h-10 text-xs`} />
+                <p className="text-[11px] text-dim">PNG شفاف أو SVG أو JPG — مربع ويفضّل 256×256 أو أكبر، حتى ٥ ميجا.</p>
+                {logoErr && <p className="text-xs text-danger">{logoErr}</p>}
+              </div>
+              <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" className="hidden" onChange={(e) => { onLogo(e.target.files?.[0]); e.target.value = ''; }} />
+            </div>
+          </div>
           {text('url', 'رابط الموقع الرسمي', { type: 'url', dir: 'ltr', placeholder: 'https://' })}
-          {text('logo', 'رابط الشعار (صورة)', { dir: 'ltr', placeholder: 'https://.../logo.png' })}
           {num('priceMonthly', 'السعر الشهري (0 = مجاني)')}
           {text('currency', 'العملة المعروضة')}
           {text('maxQuality', 'أقصى جودة', { placeholder: '4K UHD' })}
@@ -226,10 +290,11 @@ function PlatformForm({ initial, isNew, onClose, onSave }: { initial: Platform; 
           <Field label="الدول (أكواد مفصولة بفاصلة)"><input dir="ltr" value={regions} onChange={(e) => setRegions(e.target.value)} className={inputClass} placeholder="EG, SA, AE" /></Field>
           <label className="flex items-center justify-between gap-3 rounded-xl bg-panel p-4 text-sm">متاح التنزيل بدون إنترنت<Toggle checked={f.offline} onChange={(v) => set('offline', v)} /></label>
           <label className="flex items-center justify-between gap-3 rounded-xl bg-panel p-4 text-sm">ظاهرة على الموقع<Toggle checked={f.active !== false} onChange={(v) => set('active', v)} tone="gold" /></label>
+          <label className="flex items-center justify-between gap-3 rounded-xl bg-panel p-4 text-sm sm:col-span-2"><span>مميزة في الرئيسية <span className="block text-xs text-muted">تظهر أولاً في قسم «منصات البث القانونية»</span></span><Toggle checked={!!f.featured} onChange={(v) => set('featured', v)} tone="gold" /></label>
         </div>
         <div className="flex flex-wrap justify-end gap-2 border-t border-line/60 p-5">
           <Button type="button" variant="dark" pill={false} onClick={onClose}>إلغاء</Button>
-          <Button pill={false} loading={busy}>{isNew ? 'إضافة المنصة' : 'حفظ التعديلات'}</Button>
+          <Button pill={false} loading={busy} disabled={uploading}>{isNew ? 'إضافة المنصة' : 'حفظ التعديلات'}</Button>
         </div>
       </motion.form>
     </motion.div>

@@ -10,11 +10,11 @@ export default function Page() {
   if (!titles) return <PageSkeleton />;
   return (
     <CatalogView
+      type="program"
       heading="البرامج والوثائقيات"
       subtitle="برامج حوارية ووثائقية ورياضية متاحة عبر المنصات الرسمية."
       eyebrow="برامج مرخصة"
       countLabel={`${toArabicDigits(titles.length)} برنامجاً`}
-      categories={['الكل', 'حواري', 'وثائقي', 'رياضة', 'مسابقات']}
       titles={titles}
     />
   );

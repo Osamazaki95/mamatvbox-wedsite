@@ -9,7 +9,12 @@ export const endpoints = {
     expiring: '/titles/expiring',           // GET  ?days=7
     bySlug: (slug: string) => `/titles/${slug}`,
     similar: (slug: string) => `/titles/${slug}/similar`,
+    popular: '/titles/popular',             // GET  ?type=&limit=  (most viewed)
+    top10: '/titles/top10',                 // GET
+    ramadan: '/titles/ramadan',             // GET
+    view: (slug: string) => `/titles/${slug}/view`, // POST (counts a page view)
   },
+  config: '/config',                        // GET  public site settings
   people: {
     bySlug: (slug: string) => `/people/${slug}`,
   },

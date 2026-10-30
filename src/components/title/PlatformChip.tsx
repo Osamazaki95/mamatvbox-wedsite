@@ -1,31 +1,30 @@
-import { BadgeCheck, Clapperboard, MonitorPlay, PlayCircle, Star, Tv } from 'lucide-react';
-import type { PlatformId } from '@/lib/api/types';
-import { cn } from '@/lib/utils';
+'use client';
 
+import { BadgeCheck } from 'lucide-react';
+import type { PlatformId } from '@/lib/api/types';
+import { platformById, usePlatformList } from '@/lib/site';
+import { cn } from '@/lib/utils';
+import { PlatformLogo } from './PlatformLogo';
+
+/** Fallback names for the original platforms (before the platform list loads). */
 const names: Record<PlatformId, string> = {
   shahid: 'Shahid VIP', watchit: 'Watch It', netflix: 'Netflix', osn: '+OSN', prime: 'Prime Video',
   yango: 'Yango Play', appletv: '+Apple TV', starzplay: 'STARZPLAY', youtube: 'YouTube Movies',
 };
 
-const icons: Record<PlatformId, typeof Tv> = {
-  shahid: Clapperboard, watchit: PlayCircle, netflix: MonitorPlay, osn: MonitorPlay,
-  prime: MonitorPlay, yango: Clapperboard, appletv: Tv, starzplay: Star, youtube: MonitorPlay,
-};
-const iconTone: Record<PlatformId, string> = {
-  shahid: 'text-teal', watchit: 'text-gold', netflix: 'text-danger', osn: 'text-ink',
-  prime: 'text-muted', yango: 'text-teal', appletv: 'text-ink', starzplay: 'text-gold', youtube: 'text-danger',
-};
+export const platformName = (id: PlatformId) => platformById(id)?.name || names[id] || id;
 
-export const platformName = (id: PlatformId) => names[id] ?? id;
-
-export function PlatformChip({ id, withIcon = true, className }: { id: PlatformId; withIcon?: boolean; className?: string }) {
-  const Icon = icons[id] ?? Tv;
-  return (
-    <span className={cn('inline-flex items-center gap-2 rounded-full border border-line/70 bg-surface px-4 py-1.5 text-xs font-semibold transition hover:border-teal/50 hover:-translate-y-0.5', className)}>
+export function PlatformChip({ id, withIcon = true, className, href }: { id: PlatformId; withIcon?: boolean; className?: string; href?: string }) {
+  usePlatformList(); // re-render once names/logos arrive
+  const p = platformById(id);
+  const body = (
+    <>
+      {withIcon && <PlatformLogo platform={p ?? { name: platformName(id), color: '#9CA3AF' }} size="xs" />}
       {platformName(id)}
-      {withIcon && <Icon className={cn('h-4 w-4', iconTone[id] ?? 'text-muted')} />}
-    </span>
+    </>
   );
+  const cls = cn('inline-flex items-center gap-2 rounded-full border border-line/70 bg-surface py-1.5 pe-4 ps-1.5 text-xs font-semibold transition hover:-translate-y-0.5 hover:border-teal/50 hover:text-ink', className);
+  return href ? <a href={href} className={cls}>{body}</a> : <span className={cls}>{body}</span>;
 }
 
 export function VerifiedMark() {

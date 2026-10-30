@@ -31,6 +31,14 @@ try {
         exit;
     }
 
+    // Pages switched off from the dashboard (إعدادات الموقع) send visitors to the home page.
+    $features = kv_get('settings')['features'];
+    if ((!$features['accounts'] && preg_match('#^(login|signup|forgot-password|reset-password|account|watchlist|notifications|onboarding)(/|$)#', $path))
+        || (!$features['pricing'] && preg_match('#^(pricing|checkout)(/|$)#', $path))) {
+        header('Location: /', true, 302);
+        exit;
+    }
+
     $seo = kv_get('settings')['seo'];
     $base = site_url();
     $title = $seo['title'];

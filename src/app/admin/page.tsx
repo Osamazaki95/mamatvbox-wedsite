@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowLeft, FileUp, Globe, LayoutDashboard, Network, Plus, RefreshCw } from 'lucide-react';
+import { ArrowLeft, FileUp, Globe, LayoutDashboard, LayoutTemplate, Network, Plus, RefreshCw, Tags } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { Counter, Stagger, StaggerItem } from '@/components/motion';
@@ -15,6 +15,8 @@ const actions = [
   { href: '/admin/titles/?new=1', icon: Plus, t: 'إضافة فيلم أو مسلسل', d: 'اسم، بوستر، منصات، ورابط رسمي', c: 'text-gold' },
   { href: '/admin/import/', icon: FileUp, t: 'استيراد جماعي', d: 'آلاف الأعمال من رابط أو ملف', c: 'text-gold' },
   { href: '/admin/platforms/', icon: Network, t: 'إدارة المنصات', d: 'إضافة وتعديل وحذف المنصات', c: 'text-teal' },
+  { href: '/admin/site/', icon: LayoutTemplate, t: 'الرئيسية والسوشيال', d: 'رمضان، أفضل ١٠، روابط الفوتر', c: 'text-gold' },
+  { href: '/admin/taxonomy/', icon: Tags, t: 'التصنيفات', d: 'البلد والنوع لكل قسم', c: 'text-violet' },
   { href: '/admin/seo/', icon: Globe, t: 'SEO والكلمات المفتاحية', d: 'العنوان والوصف والكلمات', c: 'text-violet' },
   { href: '/admin/integrations/', icon: RefreshCw, t: 'المزامنة والدفع', d: 'TMDB و Paymob', c: 'text-teal' },
 ];
@@ -57,7 +59,7 @@ export default function AdminDashboard() {
         ))}
       </Stagger>
 
-      <Stagger className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <Stagger className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {actions.map((a) => (
           <StaggerItem key={a.href}>
             <Link href={a.href} className="group flex h-full items-center gap-4 bg-card p-5 transition hover:bg-panel hover:text-ink">

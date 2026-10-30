@@ -27,10 +27,14 @@ scripts/pack.mjs  ينسخ backend داخل out بعد البناء
 |---|---|
 | `GET /api/titles?type=&platform=&region=` | الأعمال |
 | `GET /api/titles/trending` · `/expiring` · `/{slug}` · `/{slug}/similar` | |
+| `GET /api/titles/popular?type=&limit=` · `/top10` · `/ramadan` | الأكثر مشاهدة / أفضل ١٠ / رمضان |
+| `POST /api/titles/{slug}/view` | عدّ مشاهدة صفحة العمل |
+| `GET /api/config` | إعدادات الموقع العامة (الأقسام، التصنيفات، السوشيال) |
 | `GET /api/platforms` · `/api/search?q=` · `/api/people/{slug}` | |
 | `GET /api/meta/countries` · `/api/billing/plans` | |
 | `POST /api/admin-auth` · `DELETE` | دخول/خروج الأدمن |
 | `/api/admin/platforms` (GET/POST) · `/api/admin/platforms/{id}` (PUT/DELETE) | إدارة المنصات |
 | `/api/admin/settings` (GET/PUT) · `/api/admin/integrations` · `POST /api/admin/sync` | الإعدادات والمزامنة |
+| `POST /api/admin/upload?folder=posters\|logos` | رفع بوستر أو لوجو منصة |
 | `POST /api/payments/checkout` · `/api/payments/webhook` | Paymob |
 | `/sitemap.xml` · `/robots.txt` | تلقائي |

@@ -346,6 +346,24 @@ ESC للإغلاق|ESC to close|Échap pour fermer|ESC para cerrar|按 ESC 关�
 ساعتان|2 hours|2 heures|2 horas|2 小时|2 horas
 {n} حلقة|{n} episodes|{n} épisodes|{n} episodios|{n} 集|{n} episódios
 {n} حلقات|{n} episodes|{n} épisodes|{n} episodios|{n} 集|{n} episódios
+حسب البلد|By country|Par pays|Por país|按国家|Por país
+حسب النوع|By genre|Par genre|Por género|按类型|Por gênero
+الأكثر مشاهدة|Most watched|Les plus regardés|Lo más visto|最多观看|Mais assistidos
+كل الأفلام|All movies|Tous les films|Todas las películas|全部电影|Todos os filmes
+كل المسلسلات|All series|Toutes les séries|Todas las series|全部剧集|Todas as séries
+كل البرامج|All shows|Toutes les émissions|Todos los programas|全部节目|Todos os programas
+كل الكرتون|All cartoons|Tous les dessins animés|Todos los dibujos animados|全部动画|Todos os desenhos
+الأفلام الأكثر مشاهدة|Most watched movies|Films les plus regardés|Películas más vistas|最多观看的电影|Filmes mais assistidos
+المسلسلات الأكثر مشاهدة|Most watched series|Séries les plus regardées|Series más vistas|最多观看的剧集|Séries mais assistidas
+البرامج الأكثر مشاهدة|Most watched shows|Émissions les plus regardées|Programas más vistos|最多观看的节目|Programas mais assistidos
+الكرتون الأكثر مشاهدة|Most watched cartoons|Dessins animés les plus regardés|Dibujos animados más vistos|最多观看的动画|Desenhos mais assistidos
+الأعلى مشاهدة — أفضل ١٠ أعمال|Top 10 most watched|Top 10 des plus regardés|Top 10 más vistos|观看最多的前10名|Top 10 mais assistidos
+مسلسلات رمضان|Ramadan series|Séries du Ramadan|Series de Ramadán|斋月剧集|Séries do Ramadã
+إظهار جميع المنصات|Show all platforms|Voir toutes les plateformes|Ver todas las plataformas|显示全部平台|Ver todas as plataformas
+تابعنا على السوشيال ميديا|Follow us|Suivez-nous|Síguenos|关注我们|Siga-nos
+الإعلان الرسمي|Official trailer|Bande-annonce officielle|Tráiler oficial|官方预告片|Trailer oficial
+دليل المنصات|Platforms guide|Guide des plateformes|Guía de plataformas|平台指南|Guia de plataformas
+البلد|Country|Pays|País|国家|País
 `;
 
 const IDX: Record<string, number> = { en: 0, fr: 1, es: 2, zh: 3, pt: 4 };

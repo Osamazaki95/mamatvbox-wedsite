@@ -33,6 +33,17 @@ function route_public(string $method, array $seg, array $body): void {
     [$a, $b, $c] = array_pad($seg, 3, null);
     $region = isset($_GET['region']) ? (string) $_GET['region'] : null;
 
+    if ($method === 'POST' && $a === 'titles' && $b && $c === 'view') {
+        // One view per visit of a title page (the browser sends it at most once per session).
+        $id = null;
+        foreach (kv_get('titles') as $x) if (($x['slug'] ?? '') === $b) { $id = $x['id']; break; }
+        if (!$id) out(['ok' => false], 404);
+        $v = views();
+        $v[$id] = (int) ($v[$id] ?? 0) + 1;
+        kv_set('views', $v);
+        out(['ok' => true]);
+    }
+
     if ($method !== 'GET') {
         if ($a === 'auth' && $b === 'magic-link') out(['ok' => true, 'expiresIn' => 900]);
         if ($a === 'me' && !$b) out(array_replace(seed()['currentUser'], $body));
@@ -40,12 +51,26 @@ function route_public(string $method, array $seg, array $body): void {
     }
 
     switch ($a) {
+        case 'config':
+            out(public_config());
+
         case 'titles':
             [, $titles] = catalog($region);
+            $limit = max(1, min(60, (int) ($_GET['limit'] ?? 20)));
+            if ($b === 'popular') {
+                $type = (string) ($_GET['type'] ?? '');
+                $list = array_values(array_filter(with_views($titles), fn($t) => !$type || $t['type'] === $type));
+                out(array_slice(sort_popular($list), 0, $limit));
+            }
+            if ($b === 'top10') out(array_slice(sort_popular(with_views($titles)), 0, 10));
+            if ($b === 'ramadan') {
+                $list = array_values(array_filter(with_views($titles), fn($t) => !empty($t['ramadan'])));
+                out(array_slice(sort_popular($list), 0, 60));
+            }
             if (!$b) {
                 $type = (string) ($_GET['type'] ?? '');
                 $pl = (string) ($_GET['platform'] ?? '');
-                out(array_values(array_filter($titles, fn($t) => (!$type || $t['type'] === $type) && (!$pl || in_array($pl, $t['platforms'], true)))));
+                out(array_values(array_filter(with_views($titles), fn($t) => (!$type || $t['type'] === $type) && (!$pl || in_array($pl, $t['platforms'], true)))));
             }
             if ($b === 'trending') {
                 usort($titles, fn($x, $y) => ((($y['source'] ?? '') === 'tmdb') <=> (($x['source'] ?? '') === 'tmdb')) ?: ($y['rating'] <=> $x['rating']));
@@ -61,6 +86,8 @@ function route_public(string $method, array $seg, array $body): void {
 
         case 'platforms':
             [$platforms] = catalog();
+            // Platforms marked «تظهر في الرئيسية» come first (stable order otherwise).
+            $platforms = array_merge(array_values(array_filter($platforms, fn($p) => !empty($p['featured']))), array_values(array_filter($platforms, fn($p) => empty($p['featured']))));
             if ($b) { foreach ($platforms as $p) if ($p['id'] === $b) out($p); out(null); }
             out($platforms);
 
@@ -143,7 +170,7 @@ function route_admin(string $method, array $seg, array $body): void {
             case 'platforms': out(kv_get('platforms'));
             case 'settings': out(kv_get('settings'));
             case 'titles':
-                $list = array_values(array_filter(kv_get('titles'), fn($t) => !empty($t['source'])));
+                $list = with_views(array_values(array_filter(kv_get('titles'), fn($t) => !empty($t['source']))));
                 usort($list, fn($x, $y) => strcmp((string) ($y['updatedAt'] ?? ''), (string) ($x['updatedAt'] ?? '')));
                 out($list);
             case 'kpis':
@@ -193,7 +220,7 @@ function route_admin(string $method, array $seg, array $body): void {
             $list = kv_get('platforms');
             $id = trim((string) preg_replace('/[^a-z0-9]+/', '-', strtolower((string) (($body['id'] ?? '') ?: ($body['name'] ?? '')))), '-') ?: 'platform-' . time();
             foreach ($list as $p) if ($p['id'] === $id) out(['error' => 'exists'], 409);
-            $created = array_replace(blank_platform(), $body, ['id' => $id, 'auto' => false]);
+            $created = array_replace(blank_platform(), $body, ['id' => $id, 'auto' => false, 'logo' => clean_image_url((string) ($body['logo'] ?? '')), 'featured' => !empty($body['featured'])]);
             $list[] = $created;
             kv_set('platforms', $list);
             out($created, 201);
@@ -224,7 +251,7 @@ function route_admin(string $method, array $seg, array $body): void {
                 out(imp_commit((array) ($body['items'] ?? []), (string) ($body['mode'] ?? 'skip')));
             }
         }
-        if ($a === 'upload') out(upload_poster());
+        if ($a === 'upload') out(upload_poster((string) ($_GET['folder'] ?? 'posters')));
         if ($a === 'sync') { require_once __DIR__ . '/sync.php'; out(run_sync()); }
         if ($a === 'titles' && $b === 'bulk') {
             $ids = array_flip(array_map('strval', (array) ($body['ids'] ?? [])));
@@ -232,6 +259,7 @@ function route_admin(string $method, array $seg, array $body): void {
             $list = kv_get('titles');
             if ($action === 'delete-all') {
                 kv_set('titles', []);
+                kv_set('views', []);
                 out(['ok' => true, 'affected' => count($list)]);
             }
             if (!$ids) out(['error' => 'no_selection'], 422);
@@ -239,6 +267,21 @@ function route_admin(string $method, array $seg, array $body): void {
                 $next = array_values(array_filter($list, fn($t) => !isset($ids[$t['id']])));
                 kv_set('titles', $next);
                 out(['ok' => true, 'affected' => count($list) - count($next)]);
+            }
+            if ($action === 'ramadan-on' || $action === 'ramadan-off') {
+                $n = 0;
+                foreach ($list as &$t) if (isset($ids[$t['id']])) { $t['ramadan'] = $action === 'ramadan-on'; $t['locked'] = true; $t['updatedAt'] = gmdate('c'); $n++; }
+                unset($t);
+                kv_set('titles', $list);
+                out(['ok' => true, 'affected' => $n]);
+            }
+            if ($action === 'origin') {
+                $origin = mb_substr(trim((string) ($body['origin'] ?? '')), 0, 40);
+                $n = 0;
+                foreach ($list as &$t) if (isset($ids[$t['id']])) { $t['origin'] = $origin !== '' ? $origin : null; $t['locked'] = true; $t['updatedAt'] = gmdate('c'); $n++; }
+                unset($t);
+                kv_set('titles', $list);
+                out(['ok' => true, 'affected' => $n]);
             }
             if ($action === 'type') {
                 $type = (string) ($body['type'] ?? '');
@@ -262,6 +305,8 @@ function route_admin(string $method, array $seg, array $body): void {
         if ($a === 'platforms' && $b) {
             $list = kv_get('platforms');
             $found = null;
+            if (array_key_exists('logo', $body)) $body['logo'] = clean_image_url((string) $body['logo']);
+            if (array_key_exists('featured', $body)) $body['featured'] = !empty($body['featured']);
             foreach ($list as &$p) if ($p['id'] === $b) { $p = array_replace($p, $body, ['id' => $b]); $found = $p; }
             unset($p);
             kv_set('platforms', $list);
@@ -275,6 +320,10 @@ function route_admin(string $method, array $seg, array $body): void {
                 'payments' => array_replace($cur['payments'], $body['payments'] ?? [], [
                     'integrationIds' => array_replace($cur['payments']['integrationIds'], $body['payments']['integrationIds'] ?? []),
                 ]),
+                'features' => array_replace($cur['features'], is_array($body['features'] ?? null) ? $body['features'] : []),
+                'home' => is_array($body['home'] ?? null) ? array_replace_recursive($cur['home'], $body['home']) : $cur['home'],
+                'social' => array_key_exists('social', $body) ? $body['social'] : $cur['social'],
+                'taxonomy' => is_array($body['taxonomy'] ?? null) ? array_replace($cur['taxonomy'], $body['taxonomy']) : $cur['taxonomy'],
             ]);
             if (isset($body['seo']['keywords'])) $merged['seo']['keywords'] = array_values($body['seo']['keywords']);
             if (isset($body['sync']['regions'])) $merged['sync']['regions'] = array_values($body['sync']['regions']);
@@ -295,6 +344,8 @@ function route_admin(string $method, array $seg, array $body): void {
 
     if ($method === 'DELETE' && $a === 'titles' && $b) {
         kv_set('titles', array_values(array_filter(kv_get('titles'), fn($t) => $t['id'] !== $b)));
+        $v = views();
+        if (isset($v[$b])) { unset($v[$b]); kv_set('views', $v); }
         out(['ok' => true]);
     }
 
@@ -379,7 +430,9 @@ function route_sitemap(): void {
     $base = site_url();
     [, $titles] = catalog();
     echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n" . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
-    foreach (['/', '/movies/', '/series/', '/programs/', '/kids/', '/platforms/', '/pricing/', '/search/', '/legal/'] as $p) {
+    $pages = ['/', '/movies/', '/series/', '/programs/', '/kids/', '/platforms/', '/search/', '/legal/'];
+    if (kv_get('settings')['features']['pricing']) $pages[] = '/pricing/';
+    foreach ($pages as $p) {
         echo '<url><loc>' . htmlspecialchars($base . $p) . '</loc><changefreq>daily</changefreq><priority>' . ($p === '/' ? '1.0' : '0.8') . '</priority></url>';
     }
     foreach ($titles as $t) {

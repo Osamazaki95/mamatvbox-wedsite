@@ -10,11 +10,11 @@ export default function Page() {
   if (!titles) return <PageSkeleton />;
   return (
     <CatalogView
+      type="movie"
       heading="دليل وأرشيف الأفلام القانونية"
       subtitle="استكشف أين تشاهد الأفلام العربية والعالمية مع مقارنة الجودة، خيارات التنزيل دون إنترنت، والتكلفة الاشتراكية لحظة بلحظة وبشكل رسمي وآمن."
       eyebrow="أرشيف السينما القانونية المرخصة"
       countLabel={`${toArabicDigits(titles.length)} فيلماً نشطاً`}
-      categories={['الكل', 'أكشن', 'دراما', 'كوميديا', 'خيال علمي', 'رعب', 'وثائقي', 'تاريخي']}
       titles={titles}
     />
   );

@@ -29,6 +29,8 @@ export interface Platform {
   regions?: string[];
   /** true when created automatically by the sync job */
   auto?: boolean;
+  /** shown first in the home-page platforms section */
+  featured?: boolean;
 }
 
 export interface Title {
@@ -61,6 +63,14 @@ export interface Title {
   /** official page of this title on each platform (platform id → URL) */
   links?: Record<string, string>;
   updatedAt?: string;
+  /** country / language group from the dashboard taxonomy (مصري، أجنبي، ياباني ...) */
+  origin?: string | null;
+  /** listed in the Ramadan section */
+  ramadan?: boolean;
+  /** page views counted by the site */
+  views?: number;
+  /** TMDB popularity (synced titles) */
+  popularity?: number;
 }
 
 export interface Person {
@@ -179,10 +189,54 @@ export interface PaymentSettings {
   integrationIds: { card: string; wallet: string; kiosk: string };
 }
 
+export interface FeatureFlags {
+  /** login, sign-up and member pages */
+  accounts: boolean;
+  /** plans page and checkout */
+  pricing: boolean;
+}
+
+export interface HomeSettings {
+  platformsCount: number;
+  top10: { enabled: boolean; title: string };
+  ramadan: { enabled: boolean; title: string; subtitle: string };
+  mostWatched: { enabled: boolean };
+}
+
+export type SocialNetwork =
+  | 'facebook' | 'instagram' | 'x' | 'tiktok' | 'youtube' | 'snapchat' | 'whatsapp' | 'telegram'
+  | 'threads' | 'linkedin' | 'pinterest' | 'discord' | 'twitch' | 'spotify' | 'email' | 'website';
+
+export interface SocialLink {
+  id: string;
+  network: SocialNetwork;
+  url: string;
+  label?: string;
+  active: boolean;
+}
+
+export interface TaxonomyGroup { origins: string[]; genres: string[] }
+export type Taxonomy = Record<TitleType, TaxonomyGroup>;
+
 export interface SiteSettings {
   seo: SeoSettings;
   sync: SyncSettings;
   payments: PaymentSettings;
+  features: FeatureFlags;
+  home: HomeSettings;
+  social: SocialLink[];
+  taxonomy: Taxonomy;
+}
+
+/** Public part of the settings (GET /api/config). */
+export interface SiteConfig {
+  features: FeatureFlags;
+  home: HomeSettings;
+  social: SocialLink[];
+  taxonomy: Taxonomy;
+  siteName: string;
+  /** published titles (for the home-page counters) */
+  titleCount?: number;
 }
 
 export interface SyncLog {

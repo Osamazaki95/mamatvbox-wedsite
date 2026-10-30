@@ -5,11 +5,14 @@ import { Download, Play, Star } from 'lucide-react';
 import Link from 'next/link';
 import type { Title } from '@/lib/api/types';
 import { cn } from '@/lib/utils';
+import { platformById, usePlatformList } from '@/lib/site';
 import { Badge } from '../ui/primitives';
 import { platformName } from './PlatformChip';
+import { PlatformLogo } from './PlatformLogo';
 import { Poster } from './Poster';
 
 export function TitleCard({ title, cta = true, className }: { title: Title; cta?: boolean; className?: string }) {
+  usePlatformList();
   return (
     <motion.article
       whileHover={{ y: -6 }}
@@ -44,7 +47,7 @@ export function TitleCard({ title, cta = true, className }: { title: Title; cta?
             <span>{title.runtime}</span>
             <span className="flex gap-1">
               {title.platforms.slice(0, 3).map((p) => (
-                <span key={p} className="grid h-5 w-5 place-items-center rounded-full bg-panel text-[9px] font-bold text-ink">{platformName(p)[0]}</span>
+                <PlatformLogo key={p} platform={platformById(p) ?? { name: platformName(p), color: '#9CA3AF' }} size="xs" />
               ))}
             </span>
           </div>

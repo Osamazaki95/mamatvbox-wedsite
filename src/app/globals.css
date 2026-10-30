@@ -44,3 +44,6 @@ html[dir='ltr'] body { font-family: var(--font-plex), system-ui, sans-serif; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* Arrows drawn for Arabic point the other way when the site is translated to a left-to-right language */
+html[dir='ltr'] .rtl-flip { transform: scaleX(-1); }

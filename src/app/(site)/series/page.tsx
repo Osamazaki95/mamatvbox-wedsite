@@ -10,11 +10,11 @@ export default function Page() {
   if (!titles) return <PageSkeleton />;
   return (
     <CatalogView
+      type="series"
       heading="دليل المسلسلات والدراما"
       subtitle="تابع أحدث المسلسلات العربية والعالمية وأين تتوفر مواسمها الكاملة بأعلى جودة عبر المنصات المرخصة."
       eyebrow="مكتبة الدراما المرخصة"
       countLabel={`${toArabicDigits(titles.length)} مسلسلاً نشطاً`}
-      categories={['الكل', 'دراما', 'كوميديا', 'إثارة', 'جريمة', 'تاريخي']}
       titles={titles}
     />
   );
