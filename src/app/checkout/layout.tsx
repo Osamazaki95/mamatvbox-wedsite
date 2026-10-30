@@ -1,10 +1,11 @@
 import { ShieldCheck } from 'lucide-react';
 import { CancelHome, FlowHeader, SecureBadge } from '@/components/layout/FlowHeader';
+import { LanguageSwitcher } from '@/components/i18n/Language';
 
 export default function CheckoutLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <FlowHeader center={<SecureBadge />} end={<CancelHome />} />
+      <FlowHeader center={<SecureBadge />} end={<div className="flex items-center gap-2"><LanguageSwitcher /><CancelHome /></div>} />
       <main className="min-h-[70vh]">{children}</main>
       <footer className="mt-20 bg-surface py-8 text-xs text-muted">
         <div className="mx-auto flex max-w-[1300px] flex-wrap items-center justify-between gap-4 px-5">

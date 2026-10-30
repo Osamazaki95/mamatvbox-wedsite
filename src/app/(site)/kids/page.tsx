@@ -1,4 +1,7 @@
+'use client';
+
 import { Car, Moon, ShieldCheck, Sparkles, Telescope } from 'lucide-react';
+import { PageSkeleton, useLoad } from '@/components/Loader';
 import { CatalogView } from '@/components/catalog/CatalogView';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion';
 import { Poster } from '@/components/title/Poster';
@@ -6,7 +9,6 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/primitives';
 import { titlesApi } from '@/lib/api';
 
-export const metadata = { title: 'عالم الأطفال والكرتون' };
 
 const bundles = [
   { i: Car, t: 'حزمة السفر البري بدون إنترنت', d: '١٢ حلقة وتوجيه مستقلة لتسلية الصغار في المقاعد الخلفية.', tag: 'جاهزة للتنزيل' },
@@ -14,8 +16,9 @@ const bundles = [
   { i: Telescope, t: 'توابغ العلوم والاستكشاف', d: 'برامج تبسط علوم الفضاء والبيئة للأطفال بطريقة شيقة.', tag: 'تعليمي تفاعلي' },
 ];
 
-export default async function KidsPage() {
-  const titles = await titlesApi.list({ type: 'kids' });
+export default function KidsPage() {
+  const titles = useLoad(() => titlesApi.list({ type: 'kids' }));
+  if (!titles) return <PageSkeleton />;
   const hero = titles[0];
   if (!hero) return <CatalogView heading="عالم الأطفال والكرتون" subtitle="لا توجد أعمال أطفال متاحة حالياً — ستظهر تلقائياً بعد المزامنة." eyebrow="مكتبة الأطفال" countLabel="٠ عمل" categories={['الكل']} titles={[]} />;
 

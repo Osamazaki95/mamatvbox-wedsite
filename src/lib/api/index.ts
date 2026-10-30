@@ -56,7 +56,7 @@ export const peopleApi = {
       if (!p) return mockDelay(null, 0);
       return mockDelay({ ...p, works: mock.titles.filter((x) => p.titles.includes(x.id) || x.cast.includes(p.name)) }, 0);
     }
-    return apiFetch(endpoints.people.bySlug(slug), { revalidate: 900 });
+    return apiFetch('/people', { query: { name: slug } });
   },
 };
 
@@ -97,7 +97,7 @@ export const authApi = {
     return apiFetch(endpoints.auth.signup, { method: 'POST', body: { email, country } });
   },
   oauthUrl(provider: 'google' | 'apple') {
-    return `${process.env.NEXT_PUBLIC_API_BASE_URL ?? ''}${endpoints.auth.oauth(provider)}`;
+    return `/api/auth/oauth/${provider}`;
   },
 };
 

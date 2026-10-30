@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { BarChart3, Bell, Boxes, Cloud, ExternalLink, Grid3x3, LayoutList, Menu, Network, Globe, LogOut, Plug, Search, Settings2, ShieldCheck, SlidersHorizontal, TrendingUp, User, Users, X } from 'lucide-react';
+import { BarChart3, Bell, Boxes, Cloud, ExternalLink, FileUp, Grid3x3, LayoutList, Menu, Network, Globe, LogOut, Plug, Search, Settings2, ShieldCheck, SlidersHorizontal, TrendingUp, User, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -12,8 +12,8 @@ const nav = [
   { href: '/admin', label: 'نظرة عامة والتحليلات', icon: BarChart3 },
   { href: '/admin/platforms', label: 'إدارة المنصات والأسعار', icon: Network },
   { href: '/admin/matrix', label: 'مصفوفة الجودات والتراخيص', icon: Grid3x3 },
-  { href: '/admin/titles', label: 'تخصيص الأعمال والتجاوزات', icon: Boxes },
-  { href: '/admin/rows', label: 'تنظيم صفوف الرئيسية', icon: LayoutList },
+  { href: '/admin/titles', label: 'الأفلام والمسلسلات', icon: Boxes },
+  { href: '/admin/import', label: 'استيراد جماعي من رابط', icon: FileUp },
   { href: '/admin/users', label: 'المشتركون والعمليات', icon: Users },
   { href: '/admin/referrals', label: 'تقارير نقرات الإحالة', icon: TrendingUp },
   { href: '/admin/seo', label: 'SEO والكلمات المفتاحية', icon: Globe },

@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from 'react';
 import { searchApi } from '@/lib/api';
 import type { SearchResult } from '@/lib/api/types';
 import { platformName } from '../title/PlatformChip';
+import { personHref } from '@/lib/person';
 import { Poster } from '../title/Poster';
 import { Badge } from '../ui/primitives';
 
@@ -99,7 +100,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
                         <>
                           <h3 className="mb-3 mt-5 flex items-center gap-2 px-2 font-display font-bold"><UserSquare className="h-5 w-5 text-teal" /> صناع السينما والأشخاص</h3>
                           {data.people.map((p) => (
-                            <Link key={p.id} href={`/person/${p.slug}`} onClick={onClose} className="mb-2 flex items-center gap-3 rounded-2xl bg-surface p-3 hover:bg-panel hover:text-ink">
+                            <Link key={p.id} href={personHref(p.name)} onClick={onClose} className="mb-2 flex items-center gap-3 rounded-2xl bg-surface p-3 hover:bg-panel hover:text-ink">
                               <span className="grid h-12 w-12 place-items-center rounded-full bg-teal-soft font-bold text-teal">{p.name[0]}</span>
                               <span><b className="block">{p.name}</b><span className="text-xs text-muted">{p.role}</span></span>
                             </Link>

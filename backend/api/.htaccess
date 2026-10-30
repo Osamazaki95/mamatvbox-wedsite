@@ -1,0 +1,9 @@
+Options -Indexes
+RewriteEngine On
+
+<FilesMatch "^(config|config\.sample|lib|sync|paymob|import|users)\.php$|\.(json|p8)$">
+  Require all denied
+</FilesMatch>
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [QSA,L]

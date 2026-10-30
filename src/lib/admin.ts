@@ -12,8 +12,8 @@ export async function adminFetch<T>(path: string, init?: { method?: string; body
     window.location.href = `/admin-login?next=${encodeURIComponent(window.location.pathname)}`;
     throw new Error('unauthorized');
   }
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error((data as { error?: string }).error ?? `HTTP ${res.status}`);
+  const data = await res.json().catch(() => ({})) as { error?: string; message?: string };
+  if (!res.ok) throw new Error(data.error === 'server_error' && data.message ? data.message : data.error ?? `HTTP ${res.status}`);
   return data as T;
 }
 

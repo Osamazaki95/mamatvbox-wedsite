@@ -1,13 +1,17 @@
+'use client';
+
 import { Bell, Calculator, CheckCircle2, ChevronLeft, CreditCard, Crown, Edit, HeartCrack, Hourglass, PiggyBank, Snowflake, Sparkles, Zap } from 'lucide-react';
+import { PageSkeleton, useLoad } from '@/components/Loader';
 import { Bar, Reveal, Stagger, StaggerItem } from '@/components/motion';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/primitives';
 import { platformsApi } from '@/lib/api';
 
-export const metadata = { title: 'إدارة الاشتراك والتجربة' };
 
-export default async function SubscriptionPage() {
-  const platforms = (await platformsApi.list()).slice(0, 5);
+export default function SubscriptionPage() {
+  const all = useLoad(() => platformsApi.list());
+  if (!all) return <PageSkeleton />;
+  const platforms = all.slice(0, 5);
   return (
     <>
       <Reveal>

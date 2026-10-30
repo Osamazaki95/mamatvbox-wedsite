@@ -58,6 +58,9 @@ export interface Title {
   /** locked titles keep admin edits and are not overwritten by sync */
   locked?: boolean;
   adminOverrides?: Record<string, unknown>;
+  /** official page of this title on each platform (platform id → URL) */
+  links?: Record<string, string>;
+  updatedAt?: string;
 }
 
 export interface Person {

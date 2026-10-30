@@ -1,13 +1,15 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, ChevronDown, LogIn, Menu, Search, User, X } from 'lucide-react';
+import { Bell, LogIn, Menu, Search, User, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Logo } from './Logo';
 import { SearchPalette } from '../search/SearchPalette';
+import { useUser } from '@/lib/auth';
+import { LanguageSwitcher } from '../i18n/Language';
 
 const links = [
   { href: '/', label: 'الرئيسية' },
@@ -25,8 +27,10 @@ const memberLinks = [
   { href: '/account', label: 'حسابي' },
 ];
 
-export function Navbar({ signedIn = false }: { signedIn?: boolean }) {
+export function Navbar(_props: { signedIn?: boolean } = {}) {
   const pathname = usePathname();
+  const user = useUser();
+  const signedIn = !!user;
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -46,6 +50,7 @@ export function Navbar({ signedIn = false }: { signedIn?: boolean }) {
   useEffect(() => { document.body.style.overflow = open ? 'hidden' : ''; }, [open]);
 
   const items = signedIn ? [...links.slice(0, 6), ...memberLinks] : links;
+  void _props;
   const isActive = (href: string) => (href === '/' ? pathname === '/' : pathname.startsWith(href));
 
   return (
@@ -78,9 +83,7 @@ export function Navbar({ signedIn = false }: { signedIn?: boolean }) {
               <Search className="h-[18px] w-[18px]" />
             </button>
 
-            <button className="hidden h-10 items-center gap-2 rounded-full bg-surface px-3 text-xs lg:flex">
-              <span>🇪🇬</span> مصر <ChevronDown className="h-3.5 w-3.5 text-muted" />
-            </button>
+            <LanguageSwitcher />
 
             {signedIn ? (
               <>
@@ -90,10 +93,13 @@ export function Navbar({ signedIn = false }: { signedIn?: boolean }) {
                 </Link>
                 <Link href="/account" className="flex items-center gap-2 hover:text-ink">
                   <span className="hidden text-right leading-tight 2xl:block">
-                    <span className="block text-xs font-bold">أحمد السعيد</span>
-                    <span className="block text-[10px] font-semibold text-gold">عضوية VIP ذهبية</span>
+                    <span className="block max-w-[140px] truncate text-xs font-bold">{user?.name || user?.email}</span>
+                    <span className="block text-[10px] font-semibold text-gold">حسابي</span>
                   </span>
-                  <span className="grid h-10 w-10 place-items-center rounded-full bg-teal text-bg"><User className="h-5 w-5" /></span>
+                  <span className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-teal font-bold text-bg">{user?.avatar
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={user.avatar} alt="" className="h-full w-full object-cover" />
+                    : (user?.name || user?.email || '?')[0].toUpperCase()}</span>
                 </Link>
               </>
             ) : (
@@ -133,7 +139,7 @@ export function Navbar({ signedIn = false }: { signedIn?: boolean }) {
                 ))}
               </div>
               <div className="mt-auto grid gap-2 pt-6">
-                <button className="flex h-12 items-center justify-center gap-2 rounded-full bg-panel text-sm">🇪🇬 مصر (EGP) <ChevronDown className="h-4 w-4" /></button>
+                <LanguageSwitcher full />
                 {!signedIn && (
                   <div className="grid grid-cols-2 gap-2">
                     <Link href="/login" className="flex h-12 items-center justify-center gap-2 rounded-full bg-panel text-sm font-semibold"><LogIn className="h-4 w-4" /> تسجيل الدخول</Link>

@@ -1,4 +1,7 @@
+'use client';
+
 import { Bell, BellRing, Check, Download, Filter, PiggyBank, Search, SlidersHorizontal, Star, Wallet } from 'lucide-react';
+import { PageSkeleton, useLoad } from '@/components/Loader';
 import { HomeHero } from '@/components/home/HomeHero';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion';
 import { Poster } from '@/components/title/Poster';
@@ -21,13 +24,15 @@ const faqs = [
   { q: 'هل تدعم المنصة تتبع العروض بدقة 4K وتقنيات الصوت Dolby؟', a: 'نعم، نرصد الجودة القصوى المتاحة لكل عمل على كل منصة بما في ذلك HDR10 وDolby Vision وDolby Atmos.' },
 ];
 
-export default async function HomePage() {
-  const [trending, platforms, all] = await Promise.all([titlesApi.trending(), platformsApi.list(), titlesApi.list()]);
+export default function HomePage() {
+  const d = useLoad(() => Promise.all([titlesApi.trending(), platformsApi.list(), titlesApi.list()]));
+  if (!d) return <PageSkeleton />;
+  const [trending, platforms, all] = d;
   const featured = all[0];
 
   return (
     <>
-      <HomeHero />
+      <HomeHero stats={{ titles: all.length, platforms: platforms.length }} />
 
       <section className="mx-auto max-w-[1400px] px-5 py-14">
         <Reveal><SectionHeader eyebrow="خطوة بخطوة" title="كيف تعمل المنصة في ٣ خطوات بسيطة" subtitle="رحلة سينمائية ذكية تبدأ من البحث وتنتهي بالمشاهدة بضغطة واحدة." /></Reveal>
@@ -47,7 +52,7 @@ export default async function HomePage() {
 
       <section className="mx-auto max-w-[1400px] px-5 py-10">
         <div className="card p-7">
-          <SectionHeader eyebrow="منصات البث القانونية في مصر والشرق الأوسط" title="شركاء المحتوى والمنصات المرخصة التسع" />
+          <SectionHeader eyebrow="منصات البث القانونية في مصر والشرق الأوسط" title="شركاء المحتوى والمنصات المرخصة" />
           <Stagger className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             {platforms.map((p) => (
               <StaggerItem key={p.id} className="panel p-5 text-center transition hover:-translate-y-1 hover:bg-line">
@@ -67,18 +72,14 @@ export default async function HomePage() {
           <Poster title={featured} className="aspect-[2/3] rounded-2xl" />
           <div>
             <Badge tone="gold">بحث تفاعلي مباشر</Badge>
-            <h3 className="mt-3 font-display text-2xl font-bold">أين تشاهد فيلم «{featured.title}» الآن؟</h3>
-            <p className="mt-1 text-sm text-muted">نتائج مباشرة لمصر مع ترتيب حسب الجودة والتوفر في باقتك.</p>
+            <h3 className="mt-3 font-display text-2xl font-bold">أين تشاهد «{featured.title}» الآن؟</h3>
+            <p className="mt-1 text-sm text-muted">المنصات الرسمية المتاح عليها العمل.</p>
             <div className="mt-6 space-y-3">
-              {[
-                { name: 'Shahid VIP', note: 'مشمول في باقتك', q: '4K UHD', cta: 'شاهد على شاهد', gold: true },
-                { name: 'Watch It', note: 'متاح بالاشتراك', q: 'Full HD 1080p', cta: 'افتح Watch It' },
-                { name: 'Apple TV', note: 'شراء / تأجير رقمي', q: '4K Dolby Vision', cta: 'تأجير من Apple' },
-              ].map((r) => (
-                <div key={r.name} className="panel flex flex-wrap items-center justify-between gap-3 p-4">
-                  <div><b>{r.name}</b><p className="text-xs text-muted">{r.note}</p></div>
-                  <Badge tone={r.gold ? 'solidGold' : 'muted'}>{r.q}</Badge>
-                  <Button size="sm" variant={r.gold ? 'gold' : 'ghost'} href={`/title/${featured.slug}`}>{r.cta}</Button>
+              {platforms.filter((p) => featured.platforms.includes(p.id)).map((p, i) => (
+                <div key={p.id} className="panel flex flex-wrap items-center justify-between gap-3 p-4">
+                  <div><b>{p.nameAr || p.name}</b><p className="text-xs text-muted">{p.priceMonthly ? `${p.priceMonthly} ${p.currency} / شهرياً` : 'مجاني / حسب العمل'}</p></div>
+                  <Badge tone={i === 0 ? 'solidGold' : 'muted'}>{p.maxQuality}</Badge>
+                  <Button size="sm" variant={i === 0 ? 'gold' : 'ghost'} href={`/title/${featured.slug}/`}>شاهد على {p.nameAr || p.name}</Button>
                 </div>
               ))}
             </div>
@@ -87,7 +88,7 @@ export default async function HomePage() {
       </Reveal>
       )}
 
-      <TitleRow title="الأكثر مشاهدة اليوم في مصر" icon={<Star className="h-6 w-6" />} titles={trending} href="/movies" />
+      {trending.length > 0 && <TitleRow title="الأكثر مشاهدة اليوم في مصر" icon={<Star className="h-6 w-6" />} titles={trending} href="/movies" />}
 
       <Reveal className="mx-auto max-w-[1400px] px-5 py-10">
         <div className="card relative grid gap-8 overflow-hidden p-8 lg:grid-cols-[1fr_360px]">

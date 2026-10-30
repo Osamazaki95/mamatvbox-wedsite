@@ -9,6 +9,7 @@ import { TitleCard, TitleCardSkeleton } from '@/components/title/TitleCard';
 import { Button } from '@/components/ui/Button';
 import { Badge, Checkbox, inputClass } from '@/components/ui/primitives';
 import { searchApi, titlesApi } from '@/lib/api';
+import { personHref } from '@/lib/person';
 import type { SearchResult, Title } from '@/lib/api/types';
 
 const recent = ['كيرة والجن', 'الحشاشين', 'أوبنهايمر 4K', 'مسلسلات شاهد VIP', 'كريم عبد العزيز'];
@@ -22,7 +23,11 @@ function SearchInner() {
   const [data, setData] = useState<SearchResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [fallback, setFallback] = useState<Title[]>([]);
-  const [history, setHistory] = useState(recent);
+  const [history, setHistory] = useState<string[]>([]);
+  void recent;
+
+  useEffect(() => { try { setHistory(JSON.parse(localStorage.getItem('mtb_search_history') ?? '[]')); } catch { /* ignore */ } }, []);
+  useEffect(() => { localStorage.setItem('mtb_search_history', JSON.stringify(history)); }, [history]);
 
   useEffect(() => { titlesApi.trending().then(setFallback); }, []);
   useEffect(() => {
@@ -32,7 +37,10 @@ function SearchInner() {
     searchApi.query(q).then((r) => { setData(r); setLoading(false); });
   }, [q]);
 
-  const go = (v: string) => router.push(v ? `/search?q=${encodeURIComponent(v)}` : '/search');
+  const go = (v: string) => {
+    if (v.trim()) setHistory((h) => [v.trim(), ...h.filter((x) => x !== v.trim())].slice(0, 8));
+    router.push(v ? `/search/?q=${encodeURIComponent(v)}` : '/search/');
+  };
 
   return (
     <div className="mx-auto max-w-[1200px] px-5 py-10">
@@ -89,6 +97,19 @@ function SearchInner() {
         {q && !loading && data && data.total > 0 && (
           <motion.div key="results" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-8">
             <h2 className="mb-5 font-display text-2xl font-bold">نتائج البحث عن «{q}» <span className="text-sm text-muted">({data.total})</span></h2>
+            {data.people.length > 0 && (
+              <div className="mb-8">
+                <p className="mb-3 text-sm text-muted">ممثلين ومخرجين — اضغط لعرض كل أعمالهم:</p>
+                <div className="flex flex-wrap gap-2">
+                  {data.people.map((p) => (
+                    <a key={p.id} href={personHref(p.name)} translate="no" className="notranslate flex items-center gap-3 rounded-2xl bg-card py-2 pe-5 ps-2 transition hover:-translate-y-0.5 hover:bg-panel hover:text-ink">
+                      <span className="grid h-10 w-10 place-items-center rounded-full bg-teal-soft font-bold text-teal">{p.name[0]}</span>
+                      <span><b className="block text-sm">{p.name}</b><span className="text-xs text-muted">{p.role}</span></span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
             <Stagger className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
               {data.titles.map((t) => <StaggerItem key={t.id}><TitleCard title={t} /></StaggerItem>)}
             </Stagger>

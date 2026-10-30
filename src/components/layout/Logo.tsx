@@ -12,7 +12,7 @@ export function LogoMark({ className }: { className?: string }) {
 export function Logo({ size = 'md', href = '/' }: { size?: 'sm' | 'md' | 'lg'; href?: string }) {
   const text = { sm: 'text-lg', md: 'text-xl sm:text-2xl', lg: 'text-3xl sm:text-4xl' }[size];
   return (
-    <Link href={href} className="group flex shrink-0 items-center gap-2.5 whitespace-nowrap hover:text-ink" aria-label="Mamatvbox">
+    <Link href={href} translate="no" className="notranslate group flex shrink-0 items-center gap-2.5 whitespace-nowrap hover:text-ink" aria-label="Mamatvbox">
       <span className={cn('font-logo font-bold leading-none tracking-tight text-ink', text)}>Mamatvbox</span>
       <span className="hidden items-center gap-1.5 rounded-md bg-surface px-1.5 py-1 transition-transform duration-300 group-hover:scale-105 sm:flex">
         <LogoMark />

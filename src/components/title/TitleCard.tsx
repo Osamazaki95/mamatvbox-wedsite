@@ -38,7 +38,7 @@ export function TitleCard({ title, cta = true, className }: { title: Title; cta?
           </div>
         </div>
         <div className="p-3.5">
-          <h3 className="truncate font-display text-base font-bold">{title.title}</h3>
+          <h3 translate="no" className="notranslate truncate font-display text-base font-bold">{title.title}</h3>
           <p className="mt-1 truncate text-xs text-muted">{title.year} • {title.genres.slice(0, 2).join('، ')}</p>
           <div className="mt-2.5 flex items-center justify-between text-[11px] text-dim">
             <span>{title.runtime}</span>

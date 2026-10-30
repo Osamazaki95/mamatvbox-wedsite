@@ -1,13 +1,16 @@
+'use client';
+
 import { Check, Info, Scale, X } from 'lucide-react';
+import { PageSkeleton, useLoad } from '@/components/Loader';
 import { CountUp, Reveal, Stagger, StaggerItem } from '@/components/motion';
 import { Button } from '@/components/ui/Button';
 import { Badge, SectionHeader } from '@/components/ui/primitives';
 import { platformsApi } from '@/lib/api';
 
-export const metadata = { title: 'دليل ومقارنة المنصات' };
 
-export default async function PlatformsPage() {
-  const platforms = await platformsApi.list();
+export default function PlatformsPage() {
+  const platforms = useLoad(() => platformsApi.list());
+  if (!platforms) return <PageSkeleton />;
 
   return (
     <div className="mx-auto max-w-[1400px] px-5 py-10">

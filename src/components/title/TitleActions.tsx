@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Bookmark, BookmarkCheck, Maximize, Pause, Play, Settings, Share2, Subtitles, Volume2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { meApi } from '@/lib/api';
+import { auth, useUser } from '@/lib/auth';
 import type { Title } from '@/lib/api/types';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/primitives';
@@ -14,13 +14,21 @@ export function TitleActions({ title }: { title: Title }) {
   const [saved, setSaved] = useState(false);
   const [trailer, setTrailer] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const user = useUser();
+  useEffect(() => { if (user) setSaved(user.watchlist.includes(title.id)); }, [user, title.id]);
 
   const flash = (m: string) => { setToast(m); setTimeout(() => setToast(null), 2200); };
   const toggleSave = async () => {
+    if (user === null) { window.location.href = `/login/?next=${encodeURIComponent(window.location.pathname)}`; return; }
     const next = !saved;
     setSaved(next);
-    await meApi.toggleWatchlist(title.id, next);
-    flash(next ? 'تمت الإضافة إلى قائمة المشاهدة' : 'تمت الإزالة من القائمة');
+    try {
+      await auth.toggleWatchlist(title.id, next);
+      flash(next ? 'تمت الإضافة إلى قائمة المشاهدة' : 'تمت الإزالة من القائمة');
+    } catch {
+      setSaved(!next);
+      flash('تعذر الحفظ — جرّب تاني');
+    }
   };
   const share = async () => {
     await navigator.clipboard?.writeText(window.location.href).catch(() => undefined);

@@ -1,4 +1,7 @@
+'use client';
+
 import { Bookmark, Timer } from 'lucide-react';
+import { PageSkeleton, useLoad } from '@/components/Loader';
 import { Reveal, Stagger, StaggerItem } from '@/components/motion';
 import { TitleCard } from '@/components/title/TitleCard';
 import { TitleRow } from '@/components/title/TitleRow';
@@ -6,10 +9,11 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/primitives';
 import { meApi, titlesApi } from '@/lib/api';
 
-export const metadata = { title: 'قائمتي' };
 
-export default async function WatchlistPage() {
-  const [list, expiring] = await Promise.all([meApi.watchlist(), titlesApi.expiring()]);
+export default function WatchlistPage() {
+  const d = useLoad(() => Promise.all([meApi.watchlist(), titlesApi.expiring()]));
+  if (!d) return <PageSkeleton />;
+  const [list, expiring] = d;
   const inPlan = list.filter((t) => t.inPlan).length;
 
   return (

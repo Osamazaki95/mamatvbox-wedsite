@@ -2,6 +2,11 @@ import { notFound } from 'next/navigation';
 import { Badge } from '@/components/ui/primitives';
 import { endpoints } from '@/lib/api/endpoints';
 
+export function generateStaticParams() {
+  return [{ section: 'users' }, { section: 'referrals' }, { section: 'settings' }];
+}
+export const dynamicParams = false;
+
 const sections: Record<string, { title: string; endpoint: string }> = {
   users: { title: 'المشتركون والعمليات', endpoint: '/admin/users' },
   referrals: { title: 'تقارير نقرات الإحالة', endpoint: endpoints.admin.referrals },
