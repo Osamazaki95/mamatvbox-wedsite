@@ -1,7 +1,7 @@
-import type { Viewport } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Alexandria, IBM_Plex_Sans_Arabic, JetBrains_Mono, Montserrat_Alternates } from 'next/font/google';
-import { read } from '@/lib/server/store';
-import { siteBase, siteMetadata } from '@/lib/server/seo';
+import { earlyLangScript } from '@/lib/i18n';
+import { Translator } from '@/components/i18n/Language';
 import './globals.css';
 
 const plex = IBM_Plex_Sans_Arabic({ subsets: ['arabic', 'latin'], weight: ['300', '400', '500', '600', '700'], variable: '--font-plex' });
@@ -9,30 +9,21 @@ const alexandria = Alexandria({ subsets: ['arabic', 'latin'], weight: ['500', '6
 const logo = Montserrat_Alternates({ subsets: ['latin'], weight: ['600', '700'], variable: '--font-logo' });
 const mono = JetBrains_Mono({ subsets: ['latin'], weight: ['400', '600'], variable: '--font-mono' });
 
-// Content comes from the live store (sync + dashboard), so pages render per request.
-export const dynamic = 'force-dynamic';
-
-export const generateMetadata = siteMetadata;
+// Defaults only — on the server, seo.php replaces these with the live settings from the dashboard.
+export const metadata: Metadata = {
+  title: { default: 'Mamatvbox — دليل البث السينمائي الموحد', template: '%s | Mamatvbox' },
+  description: 'اعرف فين تتفرج على أي فيلم أو مسلسل قانونياً وبأعلى جودة. قارن التوفر والأسعار عبر منصات البث الرقمية المعتمدة.',
+};
 
 export const viewport: Viewport = { themeColor: '#0B0D12', width: 'device-width', initialScale: 1 };
 
-export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const [{ seo }, base] = await Promise.all([read('settings'), siteBase()]);
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'WebSite',
-    name: seo.siteName,
-    url: base,
-    inLanguage: 'ar',
-    potentialAction: { '@type': 'SearchAction', target: `${base}/search?q={search_term_string}`, 'query-input': 'required name=search_term_string' },
-  };
-
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ar" dir="rtl" className={`${plex.variable} ${alexandria.variable} ${logo.variable} ${mono.variable}`}>
-      <body>
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-        {children}
-      </body>
+    <html lang="ar" dir="rtl" suppressHydrationWarning className={`${plex.variable} ${alexandria.variable} ${logo.variable} ${mono.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: earlyLangScript }} />
+      </head>
+      <body>{children}<Translator /></body>
     </html>
   );
 }

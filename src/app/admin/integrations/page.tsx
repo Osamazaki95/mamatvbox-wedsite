@@ -78,10 +78,10 @@ export default function IntegrationsPage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Status ok={data.tmdbConfigured} label="مصدر البيانات (TMDB)" hint={data.tmdbConfigured ? 'متصل — المزامنة جاهزة' : 'أضف TMDB_API_KEY في ملف .env'} />
-        <Status ok={data.paymobConfigured} label="بوابة الدفع Paymob" hint={data.paymobConfigured ? 'مفاتيح Paymob مضبوطة' : 'أضف PAYMOB_SECRET_KEY و PAYMOB_PUBLIC_KEY'} />
-        <Status ok={data.hmacConfigured} label="تأمين إشعارات الدفع (HMAC)" hint={data.hmacConfigured ? 'مضبوط' : 'أضف PAYMOB_HMAC_SECRET'} />
-        <Status ok={!!data.siteUrl} label="رابط الموقع SITE_URL" hint={data.siteUrl || 'أضف SITE_URL=https://your-domain.com'} />
+        <Status ok={data.tmdbConfigured} label="مصدر البيانات (TMDB)" hint={data.tmdbConfigured ? 'متصل — المزامنة جاهزة' : 'أضف TMDB_API_KEY في ملف api/config.php'} />
+        <Status ok={data.paymobConfigured} label="بوابة الدفع Paymob" hint={data.paymobConfigured ? 'مفاتيح Paymob مضبوطة' : 'أضف PAYMOB_SECRET_KEY و PAYMOB_PUBLIC_KEY في api/config.php'} />
+        <Status ok={data.hmacConfigured} label="تأمين إشعارات الدفع (HMAC)" hint={data.hmacConfigured ? 'مضبوط' : 'أضف PAYMOB_HMAC_SECRET في api/config.php'} />
+        <Status ok={!!data.siteUrl} label="رابط الموقع SITE_URL" hint={data.siteUrl || 'أضف SITE_URL في api/config.php'} />
       </div>
 
       <section className="bg-card p-5 sm:p-7">
@@ -162,7 +162,7 @@ export default function IntegrationsPage() {
 
       <section className="bg-card p-5 sm:p-7">
         <h2 className="flex items-center gap-2 font-display text-xl font-bold"><CreditCard className="h-5 w-5 text-gold" /> بوابة الدفع (Paymob)</h2>
-        <p className="mt-1 text-sm text-muted">المفاتيح السرية تُكتب في ملف .env فقط. هنا تضع أرقام وسائل الدفع (Integration IDs) من لوحة Paymob.</p>
+        <p className="mt-1 text-sm text-muted">المفاتيح السرية تُكتب في ملف api/config.php فقط. هنا تضع أرقام وسائل الدفع (Integration IDs) من لوحة Paymob.</p>
         <div className="mt-5 grid gap-4 md:grid-cols-3">
           <Field label="Integration ID — البطاقات البنكية"><input dir="ltr" value={s.payments.integrationIds.card} onChange={(e) => setIds('card', e.target.value)} className={inputClass} placeholder="4xxxxxx" /></Field>
           <Field label="Integration ID — المحافظ الإلكترونية"><input dir="ltr" value={s.payments.integrationIds.wallet} onChange={(e) => setIds('wallet', e.target.value)} className={inputClass} placeholder="4xxxxxx" /></Field>

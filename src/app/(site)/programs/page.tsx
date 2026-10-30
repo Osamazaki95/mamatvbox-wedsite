@@ -1,17 +1,20 @@
+'use client';
+
 import { CatalogView } from '@/components/catalog/CatalogView';
+import { PageSkeleton, useLoad } from '@/components/Loader';
 import { titlesApi } from '@/lib/api';
+import { toArabicDigits } from '@/lib/utils';
 
-export const metadata = { title: 'برامج' };
-
-export default async function Page() {
-  const titles = await titlesApi.list({ type: 'program' });
+export default function Page() {
+  const titles = useLoad(() => titlesApi.list({ type: 'program' }));
+  if (!titles) return <PageSkeleton />;
   return (
     <CatalogView
+      type="program"
       heading="البرامج والوثائقيات"
       subtitle="برامج حوارية ووثائقية ورياضية متاحة عبر المنصات الرسمية."
       eyebrow="برامج مرخصة"
-      countLabel="٣١٠ برنامجاً"
-      categories={['الكل', 'حواري', 'وثائقي', 'رياضة', 'مسابقات']}
+      countLabel={`${toArabicDigits(titles.length)} برنامجاً`}
       titles={titles}
     />
   );

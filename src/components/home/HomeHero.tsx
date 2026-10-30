@@ -5,10 +5,11 @@ import { ArrowLeft, Search, Sparkles } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { CountUp } from '@/components/motion';
+import { toArabicDigits } from '@/lib/utils';
 
-const chips = ['كيرة والجن', 'أوبنهايمر', 'الحشاشين', 'أفلام 4K', 'متاح للتنزيل'];
+const chips = ['أفلام عربي', 'مسلسلات', 'كرتون', '4K', 'كوميدي'];
 
-export function HomeHero() {
+export function HomeHero({ stats }: { stats?: { titles: number; platforms: number } }) {
   const router = useRouter();
   const [q, setQ] = useState('');
   const go = (v = q) => v.trim() && router.push(`/search?q=${encodeURIComponent(v)}`);
@@ -35,7 +36,7 @@ export function HomeHero() {
         </motion.h1>
 
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mx-auto mt-5 max-w-2xl text-muted">
-          قارن التوفر وجودة العرض والتنزيل عبر ٩ منصات رقمية معتمدة في مكان واحد ويدون تشتت.
+          قارن التوفر وجودة العرض والتنزيل عبر {stats?.platforms ? `${toArabicDigits(stats.platforms)} منصة رقمية معتمدة` : 'المنصات الرقمية المعتمدة'} في مكان واحد وبدون تشتت.
         </motion.p>
 
         <motion.form
@@ -55,8 +56,8 @@ export function HomeHero() {
 
         <div className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-4">
           {[
-            { v: 48000, s: '+', l: 'عمل سينمائي وتلفزيوني' },
-            { v: 9, s: '', l: 'منصات رسمية مرخصة' },
+            { v: stats?.titles ?? 0, s: '', l: 'عمل سينمائي وتلفزيوني' },
+            { v: stats?.platforms ?? 0, s: '', l: 'منصات رسمية مرخصة' },
             { v: 100, s: '%', l: 'توجيه قانوني بدون قرصنة' },
             { v: 0.4, s: 'ث', l: 'زمن الاستجابة ومقارنة الأسعار', d: 1 },
           ].map((k, i) => (

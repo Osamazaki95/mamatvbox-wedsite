@@ -6,11 +6,15 @@
 import { apiFetch, mockDelay, USE_MOCK } from './client';
 import { endpoints } from './endpoints';
 import * as mock from '../mock/data';
+import { defaultConfig } from '../site-defaults';
 import type {
   AdminKpi, AppNotification, Country, Invoice, PaymentRequest, PaymentResult,
-  Person, Plan, Platform, PlatformId, ReferralShare, SearchResult, Title,
+  Person, Plan, Platform, PlatformId, ReferralShare, SearchResult, SiteConfig, Title,
   TitleType, UserProfile,
 } from './types';
+
+/** Mock ranking: rating stands in for real page views. */
+const mockPopular = (rows: Title[]) => [...rows].sort((a, b) => (b.views ?? 0) - (a.views ?? 0) || b.rating - a.rating);
 
 export interface TitleFilters {
   type?: TitleType;
@@ -47,6 +51,33 @@ export const titlesApi = {
     if (USE_MOCK) return mockDelay(mock.titles.filter((x) => x.slug !== slug).slice(0, 4), 0);
     return apiFetch(endpoints.titles.similar(slug), { revalidate: 900 });
   },
+  /** Most viewed titles, optionally of one type. */
+  popular(type?: TitleType, limit = 20): Promise<Title[]> {
+    if (USE_MOCK) return mockDelay(mockPopular(mock.titles.filter((x) => !type || x.type === type)).slice(0, limit), 0);
+    return apiFetch(endpoints.titles.popular, { query: { type, limit } });
+  },
+  top10(): Promise<Title[]> {
+    if (USE_MOCK) return mockDelay(mockPopular(mock.titles).slice(0, 10), 0);
+    return apiFetch(endpoints.titles.top10);
+  },
+  ramadan(): Promise<Title[]> {
+    if (USE_MOCK) return mockDelay(mock.titles.filter((x) => x.ramadan), 0);
+    return apiFetch(endpoints.titles.ramadan);
+  },
+  /** Counts one page view per title per browser session. */
+  view(slug: string): void {
+    if (USE_MOCK || typeof window === 'undefined') return;
+    const key = `mtb_viewed_${slug}`;
+    try { if (sessionStorage.getItem(key)) return; sessionStorage.setItem(key, '1'); } catch { /* private mode */ }
+    apiFetch(endpoints.titles.view(slug), { method: 'POST' }).catch(() => undefined);
+  },
+};
+
+export const configApi = {
+  get(): Promise<SiteConfig> {
+    if (USE_MOCK) return mockDelay(defaultConfig, 0);
+    return apiFetch<SiteConfig>(endpoints.config);
+  },
 };
 
 export const peopleApi = {
@@ -56,7 +87,7 @@ export const peopleApi = {
       if (!p) return mockDelay(null, 0);
       return mockDelay({ ...p, works: mock.titles.filter((x) => p.titles.includes(x.id) || x.cast.includes(p.name)) }, 0);
     }
-    return apiFetch(endpoints.people.bySlug(slug), { revalidate: 900 });
+    return apiFetch('/people', { query: { name: slug } });
   },
 };
 
@@ -97,7 +128,7 @@ export const authApi = {
     return apiFetch(endpoints.auth.signup, { method: 'POST', body: { email, country } });
   },
   oauthUrl(provider: 'google' | 'apple') {
-    return `${process.env.NEXT_PUBLIC_API_BASE_URL ?? ''}${endpoints.auth.oauth(provider)}`;
+    return `/api/auth/oauth/${provider}`;
   },
 };
 

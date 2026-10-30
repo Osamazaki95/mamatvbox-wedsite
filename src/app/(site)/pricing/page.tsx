@@ -1,4 +1,7 @@
+'use client';
+
 import { Award, Check, Minus } from 'lucide-react';
+import { PageSkeleton, useLoad } from '@/components/Loader';
 import { Bar, Counter, Reveal } from '@/components/motion';
 import { PricingPlans } from '@/components/pricing/PricingPlans';
 import { Button } from '@/components/ui/Button';
@@ -6,7 +9,6 @@ import { Faq } from '@/components/ui/Faq';
 import { Badge, SectionHeader } from '@/components/ui/primitives';
 import { billingApi } from '@/lib/api';
 
-export const metadata = { title: 'باقات العضوية والأسعار' };
 
 const rows: [string, string, string, string][] = [
   ['بحث الكتالوج الشامل ومحرك الاستكشاف', '✓', '✓', '✓'],
@@ -29,8 +31,9 @@ const faqs = [
 const Cell = ({ v, gold }: { v: string; gold?: boolean }) =>
   v === '✓' ? <Check className={`mx-auto h-5 w-5 ${gold ? 'text-gold' : 'text-teal'}`} /> : v === '—' ? <Minus className="mx-auto h-4 w-4 text-dim" /> : <span className={gold ? 'text-gold' : ''}>{v}</span>;
 
-export default async function PricingPage() {
-  const plans = await billingApi.plans();
+export default function PricingPage() {
+  const plans = useLoad(() => billingApi.plans());
+  if (!plans) return <PageSkeleton />;
   return (
     <div className="mx-auto max-w-[1200px] px-5 py-12">
       <Reveal className="text-center">

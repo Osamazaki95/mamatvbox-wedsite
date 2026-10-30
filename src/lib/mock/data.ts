@@ -38,6 +38,14 @@ export const titles: Title[] = [
   t({ id: '14', slug: 'grand-magical', title: 'مسلسل صلة رحم', type: 'series', year: 2024, genres: ['دراما'], rating: 8.4, runtime: '30 حلقة', quality: '4K UHD', platforms: ['shahid'], tint: '#374151', director: 'تامر نادي', cast: ['إياد نصار'], overview: 'طبيب يدخل في أزمة أخلاقية بسبب تأجير الأرحام.' }),
 ];
 
+// Demo-only: origin + Ramadan flag so the new home sections and filters have data in mock mode.
+titles.forEach((x) => {
+  const arabic = x.platforms.some((p) => p === 'shahid' || p === 'watchit');
+  x.origin ??= x.type === 'kids' ? (arabic ? 'عربي' : 'أجنبي') : arabic ? 'مصري' : 'أجنبي';
+  x.ramadan ??= x.type === 'series' && arabic;
+});
+
+
 export const people: Person[] = [
   { id: 'p1', slug: 'karim-abdelaziz', name: 'كريم عبد العزيز', role: 'ممثل ومخرج مصري • 48 سنة • القاهرة', bio: 'أحد أبرز نجوم السينما والدراما التلفزيونية في العالم العربي، صاحب أعلى إيرادات شباك التذاكر في تاريخ السينما المصرية بسلسلة أعمال فارقة مثل «كيرة والجن»، «الفيل الأزرق»، ومسلسل «الحشاشين».', titles: ['1', '3', '6', '7'] },
   { id: 'p2', slug: 'ahmed-ezz', name: 'أحمد عز', role: 'ممثل مصري', bio: 'نجم أكشن ودراما مصري.', titles: ['1', '8'] },

@@ -5,11 +5,14 @@ import { Download, Play, Star } from 'lucide-react';
 import Link from 'next/link';
 import type { Title } from '@/lib/api/types';
 import { cn } from '@/lib/utils';
+import { platformById, usePlatformList } from '@/lib/site';
 import { Badge } from '../ui/primitives';
 import { platformName } from './PlatformChip';
+import { PlatformLogo } from './PlatformLogo';
 import { Poster } from './Poster';
 
 export function TitleCard({ title, cta = true, className }: { title: Title; cta?: boolean; className?: string }) {
+  usePlatformList();
   return (
     <motion.article
       whileHover={{ y: -6 }}
@@ -38,13 +41,13 @@ export function TitleCard({ title, cta = true, className }: { title: Title; cta?
           </div>
         </div>
         <div className="p-3.5">
-          <h3 className="truncate font-display text-base font-bold">{title.title}</h3>
+          <h3 translate="no" className="notranslate truncate font-display text-base font-bold">{title.title}</h3>
           <p className="mt-1 truncate text-xs text-muted">{title.year} • {title.genres.slice(0, 2).join('، ')}</p>
           <div className="mt-2.5 flex items-center justify-between text-[11px] text-dim">
             <span>{title.runtime}</span>
             <span className="flex gap-1">
               {title.platforms.slice(0, 3).map((p) => (
-                <span key={p} className="grid h-5 w-5 place-items-center rounded-full bg-panel text-[9px] font-bold text-ink">{platformName(p)[0]}</span>
+                <PlatformLogo key={p} platform={platformById(p) ?? { name: platformName(p), color: '#9CA3AF' }} size="xs" />
               ))}
             </span>
           </div>

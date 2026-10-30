@@ -1,17 +1,20 @@
+'use client';
+
 import { CatalogView } from '@/components/catalog/CatalogView';
+import { PageSkeleton, useLoad } from '@/components/Loader';
 import { titlesApi } from '@/lib/api';
+import { toArabicDigits } from '@/lib/utils';
 
-export const metadata = { title: 'مسلسلات' };
-
-export default async function Page() {
-  const titles = await titlesApi.list({ type: 'series' });
+export default function Page() {
+  const titles = useLoad(() => titlesApi.list({ type: 'series' }));
+  if (!titles) return <PageSkeleton />;
   return (
     <CatalogView
+      type="series"
       heading="دليل المسلسلات والدراما"
       subtitle="تابع أحدث المسلسلات العربية والعالمية وأين تتوفر مواسمها الكاملة بأعلى جودة عبر المنصات المرخصة."
       eyebrow="مكتبة الدراما المرخصة"
-      countLabel="٨٦٠ مسلسلاً نشطاً"
-      categories={['الكل', 'دراما تاريخية', 'كوميديا', 'إثارة', 'رمضان', 'دراما اجتماعية']}
+      countLabel={`${toArabicDigits(titles.length)} مسلسلاً نشطاً`}
       titles={titles}
     />
   );

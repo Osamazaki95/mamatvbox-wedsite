@@ -1,0 +1,436 @@
+{
+ "platforms": [
+  {
+   "logo": "",
+   "regions": [
+    "EG"
+   ],
+   "kind": "subscription",
+   "active": true,
+   "id": "shahid",
+   "name": "Shahid VIP",
+   "nameAr": "شاهد VIP",
+   "tagline": "الصالون الترفيهي الأول عربياً",
+   "color": "#4FE3D0",
+   "priceMonthly": 89,
+   "currency": "ج.م",
+   "maxQuality": "4K UHD",
+   "hdr": "HDR10",
+   "audio": "Dolby Digital 5.1",
+   "screens": 3,
+   "offline": true,
+   "trialDays": 7,
+   "catalogSize": 0,
+   "tmdbProviderIds": [
+    1715
+   ],
+   "url": "https://shahid.mbc.net"
+  },
+  {
+   "logo": "",
+   "regions": [
+    "EG"
+   ],
+   "kind": "subscription",
+   "active": true,
+   "id": "watchit",
+   "name": "Watch It",
+   "nameAr": "ووتش إت",
+   "tagline": "الأرشيف المصري والدراما الحية",
+   "color": "#FBBF24",
+   "priceMonthly": 65,
+   "currency": "ج.م",
+   "maxQuality": "1080p FHD",
+   "hdr": null,
+   "audio": "Stereo 2.0",
+   "screens": 2,
+   "offline": true,
+   "trialDays": 0,
+   "catalogSize": 0,
+   "tmdbProviderIds": [],
+   "url": "https://www.watchit.com"
+  },
+  {
+   "logo": "",
+   "regions": [
+    "EG"
+   ],
+   "kind": "subscription",
+   "active": true,
+   "id": "netflix",
+   "name": "Netflix",
+   "nameAr": "نتفليكس",
+   "tagline": "إنتاجات عالمية وأصلية",
+   "color": "#F87171",
+   "priceMonthly": 120,
+   "currency": "ج.م",
+   "maxQuality": "4K UHD",
+   "hdr": "Dolby Vision",
+   "audio": "Dolby Atmos",
+   "screens": 4,
+   "offline": true,
+   "trialDays": 0,
+   "catalogSize": 0,
+   "tmdbProviderIds": [
+    8
+   ],
+   "url": "https://www.netflix.com"
+  },
+  {
+   "logo": "",
+   "regions": [
+    "EG"
+   ],
+   "kind": "subscription",
+   "active": true,
+   "id": "osn",
+   "name": "+OSN",
+   "nameAr": "أو إس إن بلس",
+   "tagline": "موطن HBO الحصري",
+   "color": "#C4B5FD",
+   "priceMonthly": 99,
+   "currency": "ج.م",
+   "maxQuality": "4K UHD",
+   "hdr": "Dolby Vision",
+   "audio": "Dolby Atmos",
+   "screens": 4,
+   "offline": true,
+   "trialDays": 7,
+   "catalogSize": 0,
+   "tmdbProviderIds": [
+    629
+   ],
+   "url": "https://osnplus.com"
+  },
+  {
+   "logo": "",
+   "regions": [
+    "EG"
+   ],
+   "kind": "subscription",
+   "active": true,
+   "id": "prime",
+   "name": "Prime Video",
+   "nameAr": "أمازون برايم",
+   "tagline": "سينما هوليوود وأفلام عالمية",
+   "color": "#60A5FA",
+   "priceMonthly": 29,
+   "currency": "ج.م",
+   "maxQuality": "4K UHD",
+   "hdr": "HDR10+",
+   "audio": "Dolby Atmos",
+   "screens": 3,
+   "offline": true,
+   "trialDays": 30,
+   "catalogSize": 0,
+   "tmdbProviderIds": [
+    119,
+    9
+   ],
+   "url": "https://www.primevideo.com"
+  },
+  {
+   "logo": "",
+   "regions": [
+    "EG"
+   ],
+   "kind": "subscription",
+   "active": true,
+   "id": "yango",
+   "name": "Yango Play",
+   "nameAr": "يانغو بلاي",
+   "tagline": "باقة السينما والموسيقى",
+   "color": "#4FE3D0",
+   "priceMonthly": 49,
+   "currency": "ج.م",
+   "maxQuality": "4K UHD",
+   "hdr": null,
+   "audio": "Stereo 2.0",
+   "screens": 2,
+   "offline": false,
+   "trialDays": 30,
+   "catalogSize": 0,
+   "tmdbProviderIds": [],
+   "url": "https://yangoplay.com"
+  },
+  {
+   "logo": "",
+   "regions": [
+    "EG"
+   ],
+   "kind": "subscription",
+   "active": true,
+   "id": "appletv",
+   "name": "+Apple TV",
+   "nameAr": "أبل تي في بلس",
+   "tagline": "جودة سينمائية فائقة",
+   "color": "#E5E7EB",
+   "priceMonthly": 149,
+   "currency": "ج.م",
+   "maxQuality": "4K HDR",
+   "hdr": "Dolby Vision",
+   "audio": "Dolby Atmos",
+   "screens": 6,
+   "offline": true,
+   "trialDays": 7,
+   "catalogSize": 0,
+   "tmdbProviderIds": [
+    350,
+    2
+   ],
+   "url": "https://tv.apple.com"
+  },
+  {
+   "logo": "",
+   "regions": [
+    "EG"
+   ],
+   "kind": "subscription",
+   "active": true,
+   "id": "starzplay",
+   "name": "STARZPLAY",
+   "nameAr": "ستارزبلاي",
+   "tagline": "رياضة، سينما ومسلسلات",
+   "color": "#FBBF24",
+   "priceMonthly": 65,
+   "currency": "ج.م",
+   "maxQuality": "4K UHD",
+   "hdr": "HDR10",
+   "audio": "5.1 Surround",
+   "screens": 4,
+   "offline": true,
+   "trialDays": 7,
+   "catalogSize": 0,
+   "tmdbProviderIds": [
+    630
+   ],
+   "url": "https://starzplay.com"
+  },
+  {
+   "logo": "",
+   "regions": [
+    "EG"
+   ],
+   "kind": "rental",
+   "active": true,
+   "id": "youtube",
+   "name": "YouTube Movies",
+   "nameAr": "يوتيوب أفلام",
+   "tagline": "شراء وتأجير بدون اشتراك",
+   "color": "#F87171",
+   "priceMonthly": 0,
+   "currency": "ج.م",
+   "maxQuality": "4K UHD",
+   "hdr": null,
+   "audio": "Stereo 2.0",
+   "screens": 1,
+   "offline": false,
+   "trialDays": 0,
+   "catalogSize": 0,
+   "tmdbProviderIds": [
+    192,
+    3
+   ],
+   "url": "https://www.youtube.com/movies"
+  }
+ ],
+ "titles": [],
+ "people": [],
+ "countries": [
+  {
+   "code": "EG",
+   "name": "مصر",
+   "official": "جمهورية مصر العربية",
+   "flag": "🇪🇬",
+   "currency": "EGP",
+   "currencyName": "الجنيه المصري"
+  },
+  {
+   "code": "SA",
+   "name": "السعودية",
+   "official": "المملكة العربية السعودية",
+   "flag": "🇸🇦",
+   "currency": "SAR",
+   "currencyName": "الريال السعودي"
+  },
+  {
+   "code": "AE",
+   "name": "الإمارات",
+   "official": "الإمارات العربية المتحدة",
+   "flag": "🇦🇪",
+   "currency": "AED",
+   "currencyName": "الدرهم الإماراتي"
+  },
+  {
+   "code": "KW",
+   "name": "الكويت",
+   "official": "دولة الكويت",
+   "flag": "🇰🇼",
+   "currency": "KWD",
+   "currencyName": "الدينار الكويتي"
+  },
+  {
+   "code": "QA",
+   "name": "قطر",
+   "official": "دولة قطر",
+   "flag": "🇶🇦",
+   "currency": "QAR",
+   "currencyName": "الريال القطري"
+  },
+  {
+   "code": "BH",
+   "name": "البحرين",
+   "official": "مملكة البحرين",
+   "flag": "🇧🇭",
+   "currency": "BHD",
+   "currencyName": "الدينار البحريني"
+  },
+  {
+   "code": "OM",
+   "name": "عُمان",
+   "official": "سلطنة عمان",
+   "flag": "🇴🇲",
+   "currency": "OMR",
+   "currencyName": "الريال العماني"
+  },
+  {
+   "code": "JO",
+   "name": "الأردن",
+   "official": "المملكة الأردنية الهاشمية",
+   "flag": "🇯🇴",
+   "currency": "JOD",
+   "currencyName": "الدينار الأردني"
+  },
+  {
+   "code": "LB",
+   "name": "لبنان",
+   "official": "الجمهورية اللبنانية",
+   "flag": "🇱🇧",
+   "currency": "USD",
+   "currencyName": "الدولار الأمريكي"
+  },
+  {
+   "code": "MA",
+   "name": "المغرب",
+   "official": "المملكة المغربية",
+   "flag": "🇲🇦",
+   "currency": "MAD",
+   "currencyName": "الدرهم المغربي"
+  },
+  {
+   "code": "TN",
+   "name": "تونس",
+   "official": "الجمهورية التونسية",
+   "flag": "🇹🇳",
+   "currency": "TND",
+   "currencyName": "الدينار التونسي"
+  },
+  {
+   "code": "XX",
+   "name": "دول أخرى",
+   "official": "دليل عام عالمي",
+   "flag": "🌐",
+   "currency": "USD",
+   "currencyName": "الدولار الأمريكي"
+  }
+ ],
+ "plans": [
+  {
+   "id": "free",
+   "name": "حساب الزائر",
+   "badge": "Free",
+   "monthly": 0,
+   "yearly": 0,
+   "features": [
+    {
+     "label": "البحث في كافة الأفلام والمسلسلات العربية والعالمية",
+     "included": true
+    },
+    {
+     "label": "معرفة منصات البث المتاحة للأعمال المطلوبة",
+     "included": true
+    },
+    {
+     "label": "تنبيهات فورية عند إضافة أو سحب ترخيص العناوين",
+     "included": false
+    },
+    {
+     "label": "كشف تفاصيل الجودة الدقيقة (4K, HDR, Dolby Atmos)",
+     "included": false
+    }
+   ]
+  },
+  {
+   "id": "gold",
+   "name": "العضوية الذهبية",
+   "badge": "Cinema Member",
+   "monthly": 49,
+   "yearly": 468,
+   "highlight": true,
+   "features": [
+    {
+     "label": "كاشف جودة 4K وتقنيات HDR والصوت المحيطي لكل فيلم",
+     "included": true
+    },
+    {
+     "label": "تفعيل ميزة «في باقتك» لـ ٩ منصات",
+     "included": true
+    },
+    {
+     "label": "تنبيهات حصرية بقرب انتهاء التراخيص «هيتشال قريب»",
+     "included": true
+    },
+    {
+     "label": "روابط التنزيل المباشر الرسمي للمشاهدة بدون اتصال",
+     "included": true
+    }
+   ]
+  },
+  {
+   "id": "family",
+   "name": "عضوية العائلة و VIP",
+   "badge": "Cinephile VIP",
+   "monthly": 79,
+   "yearly": 790,
+   "features": [
+    {
+     "label": "يدعم حتى ٦ أفراد بحسابات وتفضيلات مستقلة",
+     "included": true
+    },
+    {
+     "label": "تنبيهات فورية مخصصة عبر SMS وواتساب",
+     "included": true
+    },
+    {
+     "label": "رصد إقليمي غير محدود لأكثر من ٤٠ دولة",
+     "included": true
+    },
+    {
+     "label": "دعم سينمائي فوري مخصص ٢٤/٧",
+     "included": true
+    }
+   ]
+  }
+ ],
+ "invoices": [],
+ "notifications": [],
+ "currentUser": {
+  "id": "u1",
+  "name": "أحمد السعيد",
+  "email": "ahmed.cinema@example.com",
+  "phone": "+20 100 123 4567",
+  "country": "EG",
+  "memberSince": "نوفمبر ٢٠٢٣",
+  "plan": "gold",
+  "trialEndsAt": "٢٦ أكتوبر ٢٠٢٥",
+  "platforms": [
+   "shahid",
+   "watchit",
+   "prime"
+  ],
+  "watchlist": []
+ },
+ "adminKpis": [],
+ "referrals": [],
+ "trendingSearches": []
+}

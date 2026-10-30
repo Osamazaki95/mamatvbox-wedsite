@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { BarChart3, Bell, Boxes, Cloud, ExternalLink, Grid3x3, LayoutList, Menu, Network, Globe, LogOut, Plug, Search, Settings2, ShieldCheck, SlidersHorizontal, TrendingUp, User, Users, X } from 'lucide-react';
+import { BarChart3, Bell, Boxes, Cloud, ExternalLink, FileUp, Grid3x3, LayoutTemplate, Menu, Network, Globe, LogOut, Plug, Search, SlidersHorizontal, Tags, TrendingUp, User, Users, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -12,8 +12,10 @@ const nav = [
   { href: '/admin', label: 'نظرة عامة والتحليلات', icon: BarChart3 },
   { href: '/admin/platforms', label: 'إدارة المنصات والأسعار', icon: Network },
   { href: '/admin/matrix', label: 'مصفوفة الجودات والتراخيص', icon: Grid3x3 },
-  { href: '/admin/titles', label: 'تخصيص الأعمال والتجاوزات', icon: Boxes },
-  { href: '/admin/rows', label: 'تنظيم صفوف الرئيسية', icon: LayoutList },
+  { href: '/admin/titles', label: 'الأفلام والمسلسلات', icon: Boxes },
+  { href: '/admin/taxonomy', label: 'التصنيفات (البلد والنوع)', icon: Tags },
+  { href: '/admin/site', label: 'الرئيسية والسوشيال ميديا', icon: LayoutTemplate },
+  { href: '/admin/import', label: 'استيراد جماعي من رابط', icon: FileUp },
   { href: '/admin/users', label: 'المشتركون والعمليات', icon: Users },
   { href: '/admin/referrals', label: 'تقارير نقرات الإحالة', icon: TrendingUp },
   { href: '/admin/seo', label: 'SEO والكلمات المفتاحية', icon: Globe },
@@ -35,7 +37,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             <motion.nav initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', stiffness: 320, damping: 34 }} className="fixed inset-y-0 right-0 z-50 w-[82%] max-w-xs overflow-y-auto bg-surface py-5 lg:hidden">
               <div className="flex items-center justify-between px-5 pb-4"><span className="font-logo text-xl font-bold text-gold">Mamatvbox</span><button onClick={() => setOpen(false)} className="grid h-9 w-9 place-items-center rounded-full bg-panel" aria-label="إغلاق"><X className="h-4 w-4" /></button></div>
               {nav.map((n) => (
-                <Link key={n.href} href={n.href} className={cn('flex items-center gap-3 px-6 py-3.5 text-sm', path === n.href ? 'bg-teal font-bold text-bg hover:text-bg' : 'text-ink/85')}><n.icon className="h-5 w-5" /> {n.label}</Link>
+                <Link key={n.href} href={n.href} className={cn('flex items-center gap-3 px-6 py-3.5 text-sm', path.replace(/\/$/, '') === n.href ? 'bg-teal font-bold text-bg hover:text-bg' : 'text-ink/85')}><n.icon className="h-5 w-5" /> {n.label}</Link>
               ))}
             </motion.nav>
           </>
@@ -49,7 +51,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="mx-5 flex items-center justify-between bg-panel px-4 py-2.5 text-xs"><span className="flex items-center gap-2 text-teal"><span className="h-2 w-2 animate-pulse-dot rounded-full bg-teal" /> الخوادم متصلة ٪99.98</span><Cloud className="h-4 w-4 text-teal" /></div>
         <nav className="mt-6 flex-1 space-y-1">
           {nav.map((n) => {
-            const active = path === n.href;
+            const active = path.replace(/\/$/, '') === n.href;
             return (
               <Link key={n.href} href={n.href} className={cn('relative flex items-center gap-3 px-8 py-3.5 text-sm', active ? 'font-bold text-bg hover:text-bg' : 'text-ink/85')}>
                 {active && <motion.span layoutId="admin-nav" className="absolute inset-x-2 inset-y-0 -z-0 bg-teal" transition={{ type: 'spring', stiffness: 400, damping: 34 }} />}

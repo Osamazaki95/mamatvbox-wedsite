@@ -73,7 +73,7 @@ export default function OnboardingPage() {
 
   const finish = async () => {
     setSaving(true);
-    await Promise.all([meApi.savePlatforms(mine), meApi.savePreferences({ country, formats: fmt, genres: gen, languages: lang, routing: route, expiryAlerts, downloadPreview })]);
+    await Promise.all([meApi.savePlatforms(mine), meApi.savePreferences({ country, formats: fmt, genres: gen, languages: lang, routing: route, expiryAlerts, downloadPreview })]).catch(() => undefined);
     router.push('/');
   };
 

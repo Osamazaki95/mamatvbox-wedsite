@@ -6,3 +6,5 @@ out
 *.log
 .DS_Store
 data/
+backend/api/config.php
+site.zip

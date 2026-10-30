@@ -33,6 +33,17 @@
   .no-scrollbar { scrollbar-width: none; }
 }
 
+/* Automatic translator: hide Google's toolbar, tooltips and highlights */
+.goog-te-banner-frame, iframe.skiptranslate, #goog-gt-tt, .goog-te-balloon-frame,
+.VIpgJd-ZVi9od-ORHb-OEVmcd, .VIpgJd-ZVi9od-aZ2wEe-wOHMyf, #google_translate_element { display: none !important; }
+body { top: 0 !important; position: static !important; }
+.goog-text-highlight { background: none !important; box-shadow: none !important; }
+font { background: transparent !important; box-shadow: none !important; }
+html[dir='ltr'] body { font-family: var(--font-plex), system-ui, sans-serif; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* Arrows drawn for Arabic point the other way when the site is translated to a left-to-right language */
+html[dir='ltr'] .rtl-flip { transform: scaleX(-1); }
